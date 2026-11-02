@@ -33,12 +33,13 @@ def elevation_at(grid: np.ndarray, h: dict, lat: float, lon: float) -> float | N
     """Bilinear between pixel centres: lon = west + (col + 0.5) * dx, lat = north - (row + 0.5) * dy."""
     dx = (h["east"] - h["west"]) / h["width"]
     dy = (h["north"] - h["south"]) / h["height"]
-    col_f = (lon - h["west"]) / dx - 0.5
-    row_f = (h["north"] - lat) / dy - 0.5
-    if not (0 <= col_f <= h["width"] - 1 and 0 <= row_f <= h["height"] - 1):
+    # Same rules as src/core/dem.ts: null outside the bbox, clamp to edge pixels within it.
+    if not (h["south"] <= lat <= h["north"] and h["west"] <= lon <= h["east"]):
         return None
-    c0, r0 = int(np.floor(col_f)), int(np.floor(row_f))
-    c1, r1 = min(c0 + 1, h["width"] - 1), min(r0 + 1, h["height"] - 1)
+    col_f = min(max((lon - h["west"]) / dx - 0.5, 0), h["width"] - 1)
+    row_f = min(max((h["north"] - lat) / dy - 0.5, 0), h["height"] - 1)
+    c0, r0 = min(int(np.floor(col_f)), h["width"] - 2), min(int(np.floor(row_f)), h["height"] - 2)
+    c1, r1 = c0 + 1, r0 + 1
     tx, ty = col_f - c0, row_f - r0
     q = grid[[r0, r0, r1, r1], [c0, c1, c0, c1]].astype(float)
     if (q == h["noData"]).any():

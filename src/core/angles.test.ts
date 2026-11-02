@@ -20,3 +20,9 @@ describe('wrapTo180', () => {
     expect(wrapTo180(190)).toBe(-170);
   });
 });
+
+describe('wrapTo360 floating-point edge', () => {
+  it('never returns 360', () => {
+    expect(wrapTo360(-1e-15)).toBe(0);
+  });
+});

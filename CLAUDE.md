@@ -81,6 +81,7 @@ npm test                   # Jest unit tests for src/core (ts-jest, Node)
 npm run typecheck          # tsc --noEmit
 npm run lint               # ESLint (eslint-config-expo + prettier; src/core purity rules)
 npm run format             # Prettier write (format:check to verify)
+npm run elev -- 28.24625 83.94881   # elevation at lat lon from the real pack via src/core/dem.ts (tsx)
 
 # From step 5 (development build, native modules):
 npx expo prebuild
@@ -95,12 +96,15 @@ tools/pipeline/.venv/bin/python tools/pipeline/build_pack.py --region annapurna 
 tools/pipeline/.venv/bin/python tools/pipeline/build_pack.py --region annapurna --finalize-peaks  # reviewed CSV -> peaks.json
 # peaks.review.csv and peaks.json are never overwritten without --force (they hold human review).
 # Region config (bbox, must-have peaks, viewpoint OSM ids) lives in tools/pipeline/regions.py.
+tools/pipeline/.venv/bin/python tools/pipeline/make_elev_fixture.py   # regenerate tests/fixtures/annapurna_elev_reference.json after rebuilding dem.bin
 tools/pipeline/.venv/bin/python tools/pipeline/elev.py 28.2442 83.9486           # spot-check elevation at lat lon
 ```
 
 Notes:
 - Expo SDK 58, React Native 0.88, TypeScript 6, expo-router (routes live in `app/`).
 - Jest uses `tsconfig.jest.json`; tests import `describe/it/expect` from `@jest/globals` (TS 6 does not pick up Jest globals automatically).
+- Node-only files (`scripts/`, real-data tests in `tests/`) start with `/// <reference types="node" />`; Node types are not loaded for the app.
+- `tests/dem.real.test.ts` checks `src/core/dem.ts` against the Python reader on the real pack (1,008 reference points).
 
 ## Things to watch out for
 

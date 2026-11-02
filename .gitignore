@@ -46,3 +46,6 @@ tools/out/
 __pycache__/
 *.pyc
 .venv/
+
+# Jest coverage output
+coverage/
