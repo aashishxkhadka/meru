@@ -11,6 +11,7 @@ module.exports = defineConfig([
       'dist/*',
       'node_modules/*',
       'tools/pipeline/cache/*',
+      'tools/pipeline/.venv/*',
       'android/*',
       'ios/*',
       '.expo/*',

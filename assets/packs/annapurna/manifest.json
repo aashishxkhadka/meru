@@ -1,0 +1,25 @@
+{
+  "regionId": "annapurna",
+  "name": "Annapurna & Pokhara",
+  "version": 1,
+  "createdAt": "2026-11-02",
+  "dem": {
+    "file": "dem.bin",
+    "width": 2400,
+    "height": 2160,
+    "north": 29.4,
+    "south": 27.6,
+    "west": 83.0,
+    "east": 85.0,
+    "noData": -32768,
+    "resolutionArcSec": 3,
+    "dataType": "int16le",
+    "rowOrder": "north-first",
+    "verticalDatum": "EGM2008",
+    "source": "Copernicus GLO-30, resampled to 3 arc-seconds (bilinear)"
+  },
+  "attribution": [
+    "produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved",
+    "The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30"
+  ]
+}

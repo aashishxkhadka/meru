@@ -87,8 +87,11 @@ npx expo prebuild
 npm run android            # npx expo run:android
 npm run ios                # npx expo run:ios
 
-# From step 1 (data pipeline):
-python tools/pipeline/build_pack.py --region annapurna
+# Data pipeline (Python 3.11+, venv in tools/pipeline/.venv, git-ignored):
+python3 -m venv tools/pipeline/.venv && tools/pipeline/.venv/bin/pip install -r tools/pipeline/requirements.txt
+tools/pipeline/.venv/bin/python tools/pipeline/build_pack.py --region annapurna   # tiles cached in tools/pipeline/cache/
+tools/pipeline/.venv/bin/python tools/pipeline/build_pack.py --region annapurna --list-tiles
+tools/pipeline/.venv/bin/python tools/pipeline/elev.py 28.2442 83.9486           # spot-check elevation at lat lon
 ```
 
 Notes:
