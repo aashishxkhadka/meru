@@ -1,14 +1,22 @@
 #!/usr/bin/env python3
 """Build a Meru offline data pack.
 
+Runs terrain -> peaks -> viewpoints. Peaks stop at a review CSV; after a human has
+reviewed it, run with --finalize-peaks to write peaks.json.
+
 Terrain part (SPEC section 5, items 1-3):
   1. Download Copernicus DEM GLO-30 tiles covering the region bbox (cached).
   2. Mosaic, crop to bbox, resample to N arc-seconds with bilinear, fill small nodata holes.
   3. Write dem.bin (Int16 little-endian, north row first) + the dem block of manifest.json.
 
+Peaks and viewpoints (SPEC section 5, items 4-8): one cached Overpass query each, clean,
+dedupe, rank, must-have check, DEM sanity check, peaks.review.csv, viewpoints.json.
+
 Usage:
-  python tools/pipeline/build_pack.py --region annapurna
-  python tools/pipeline/build_pack.py --region annapurna --list-tiles   # show tiles, no download
+  python tools/pipeline/build_pack.py --region annapurna                     # everything
+  python tools/pipeline/build_pack.py --region annapurna --only peaks viewpoints
+  python tools/pipeline/build_pack.py --region annapurna --finalize-peaks    # after review
+  python tools/pipeline/build_pack.py --region annapurna --list-tiles        # no download
 """
 
 from __future__ import annotations
@@ -29,9 +37,14 @@ from rasterio.merge import merge
 from rasterio.transform import from_bounds
 from rasterio.warp import reproject
 
+import peaks as peaks_mod
+import viewpoints as viewpoints_mod
+from elev import load as load_dem
 from regions import REGIONS
 
 ROOT = Path(__file__).resolve().parents[2]
+PIPELINE_DIR = ROOT / "tools" / "pipeline"
+REVIEW_CSV = PIPELINE_DIR / "peaks.review.csv"
 CACHE_DIR = ROOT / "tools" / "pipeline" / "cache"
 PACKS_DIR = ROOT / "assets" / "packs"
 
@@ -212,28 +225,21 @@ def write_pack(region_id: str, region: dict, dem: np.ndarray, dem_block: dict) -
 # --------------------------------------------------------------------------- main
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--region", required=True, choices=sorted(REGIONS))
-    parser.add_argument("--list-tiles", action="store_true", help="print tiles and URLs, then exit")
-    args = parser.parse_args()
+def add_attribution(region_id: str, line: str) -> None:
+    path = PACKS_DIR / region_id / "manifest.json"
+    manifest = json.loads(path.read_text())
+    if line not in manifest.setdefault("attribution", []):
+        manifest["attribution"].append(line)
+        path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
 
-    region = REGIONS[args.region]
+
+def run_terrain(region_id: str, region: dict) -> None:
     names = tiles_for_bbox(region["north"], region["south"], region["west"], region["east"])
-
-    if args.list_tiles:
-        for n in names:
-            print(f"{COP30_BASE_URL}/{n}/{n}.tif")
-        return 0
-
-    print(f"[1/3] Copernicus GLO-30 tiles for {args.region} ({len(names)} tiles) -> {CACHE_DIR}")
+    print(f"[terrain] Copernicus GLO-30 tiles for {region_id} ({len(names)} tiles) -> {CACHE_DIR}")
     paths = [download_tile(n) for n in names]
-
-    print("[2/3] Mosaic, crop, resample, fill holes")
+    print("[terrain] Mosaic, crop, resample, fill holes")
     dem, info = build_dem(region, paths)
-
-    print("[3/3] Write pack")
-    dem_path = write_pack(args.region, region, dem, info["dem"])
+    dem_path = write_pack(region_id, region, dem, info["dem"])
 
     valid = dem[dem != NODATA_INT16]
     d = info["dem"]
@@ -245,6 +251,116 @@ def main() -> int:
     print(f"  nodata         {info['stats']['nodata_before_fill']} before fill, "
           f"{info['stats']['nodata_after_fill']} after fill")
     print(f"  dem.bin        {dem_path.relative_to(ROOT)}  {dem_path.stat().st_size / 1e6:.2f} MB")
+    print()
+
+
+def run_peaks(region_id: str, region: dict, force: bool, refresh: bool) -> None:
+    print("[peaks] OpenStreetMap natural=peak with a name")
+    elements = peaks_mod.fetch(region_id, region, refresh)
+    peaks, info = peaks_mod.clean(elements, region)
+    grid, header = load_dem(region_id)
+    peaks_mod.dem_sanity(peaks, grid, header)
+
+    print()
+    print("Peaks summary")
+    print(f"  from OSM               {len(elements)} named peaks")
+    print(f"  dropped, no elevation  {len(info['no_ele'])}")
+    print(f"  dropped, duplicate     {len(info['dropped'])}  (within {peaks_mod.DEDUPE_RADIUS_M} m)")
+    for p, kept in info["dropped"]:
+        print(f"      {p['osm_name']} {p['ele_m']} m (osm:node/{p['osm_id']}) -> kept {kept['name']} {kept['ele_m']} m")
+    by_rank = {r: sum(p["rank"] == r for p in peaks) for r in (1, 2, 3)}
+    print(f"  kept                   {len(peaks)}  (rank 1: {by_rank[1]}, rank 2: {by_rank[2]}, rank 3: {by_rank[3]})")
+
+    print()
+    print("Must-have peaks")
+    for canonical in region["must_have_peaks"]:
+        hit = next((p for p in peaks if p["must_have"] == canonical), None)
+        if hit:
+            print(f"  OK       {canonical:26} {hit['ele_m']:>5} m  osm:node/{hit['osm_id']}  (OSM name: {hit['osm_name']})")
+    for line in peaks_mod.must_have_report(peaks, info["no_ele"], region):
+        print(f"  PROBLEM  {line}")
+
+    print()
+    flagged = [p for p in peaks if any(f.startswith("DEM-DIFF") for f in p["flags"])]
+    print(f"DEM sanity check: {len(flagged)} peaks differ from the DEM by more than {peaks_mod.SANITY_LIMIT_M} m")
+    print(f"  {'peak':28} {'OSM':>5} {'DEM':>5} {'diff':>5} {'max500m':>7} {'offset':>6}  verdict")
+    for p in sorted(flagged, key=lambda p: -abs(p["diff_m"])):
+        verdict = next(f for f in p["flags"] if f.startswith("DEM-DIFF")).split(":")[1]
+        print(f"  {p['name'][:28]:28} {p['ele_m']:>5} {p['dem_m']:>5} {p['diff_m']:>5} {p['dem_max_500m']:>7} "
+              f"{p['summit_offset_m']:>5}m  {verdict}")
+
+    needs_name = [p for p in peaks if "NEEDS-ENGLISH-NAME" in p["flags"]]
+    if needs_name:
+        print()
+        print(f"Peaks without an English name ({len(needs_name)}) - fill the 'name' column in the CSV:")
+        for p in needs_name:
+            print(f"  {p['osm_name']} ({p['ele_m']} m, osm:node/{p['osm_id']})")
+
+    print()
+    if peaks_mod.write_review_csv(REVIEW_CSV, peaks, force):
+        print(f"Wrote {REVIEW_CSV.relative_to(ROOT)} - review it, then run with --finalize-peaks")
+    print()
+
+
+def run_viewpoints(region_id: str, region: dict, refresh: bool) -> None:
+    print("[viewpoints] OpenStreetMap lookup")
+    elements = viewpoints_mod.fetch(region_id, region, refresh)
+    grid, header = load_dem(region_id)
+    vps, report = viewpoints_mod.build(region, elements, grid, header)
+    out = PACKS_DIR / region_id / "viewpoints.json"
+    viewpoints_mod.write(out, vps)
+    add_attribution(region_id, OSM_ATTRIBUTION)
+
+    print()
+    print("Viewpoints (coordinates from OpenStreetMap)")
+    for r in report:
+        if r["status"] != "OK":
+            print(f"  TODO  {r['name']:26} {r['why']}")
+            continue
+        print(f"  OK    {r['name']:26} {r['lat']:.5f}, {r['lon']:.5f}  DEM {r['dem_m']} m"
+              f"{'  OSM ele ' + r['osm_ele'] if r['osm_ele'] else ''}")
+        print(f"        source: {r['url']}  \"{r['osm_name']}\" {r['kind']}")
+    print(f"Wrote {out.relative_to(ROOT)} ({len(vps)} viewpoints)")
+    print()
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--region", required=True, choices=sorted(REGIONS))
+    parser.add_argument("--list-tiles", action="store_true", help="print tiles and URLs, then exit")
+    parser.add_argument("--only", nargs="+", choices=["terrain", "peaks", "viewpoints"],
+                        help="run only these parts (default: all)")
+    parser.add_argument("--finalize-peaks", action="store_true",
+                        help="write peaks.json from the reviewed peaks.review.csv")
+    parser.add_argument("--force", action="store_true",
+                        help="allow overwriting peaks.review.csv / a reviewed peaks.json")
+    parser.add_argument("--refresh-osm", action="store_true", help="re-run Overpass queries instead of using cache")
+    args = parser.parse_args()
+    region = REGIONS[args.region]
+
+    if args.list_tiles:
+        for n in tiles_for_bbox(region["north"], region["south"], region["west"], region["east"]):
+            print(f"{COP30_BASE_URL}/{n}/{n}.tif")
+        return 0
+
+    if args.finalize_peaks:
+        out = PACKS_DIR / args.region / "peaks.json"
+        peaks = peaks_mod.finalize(REVIEW_CSV, out, region, args.force)
+        add_attribution(args.region, OSM_ATTRIBUTION)
+        no_desc = [p["name"] for p in peaks if p["rank"] == 1 and not p["description"]]
+        print(f"Wrote {out.relative_to(ROOT)}: {len(peaks)} peaks "
+              f"(rank 1: {sum(p['rank'] == 1 for p in peaks)})")
+        if no_desc:
+            print(f"Note: {len(no_desc)} rank-1 peaks have no description: {', '.join(no_desc)}")
+        return 0
+
+    parts = args.only or ["terrain", "peaks", "viewpoints"]
+    if "terrain" in parts:
+        run_terrain(args.region, region)
+    if "peaks" in parts:
+        run_peaks(args.region, region, args.force, args.refresh_osm)
+    if "viewpoints" in parts:
+        run_viewpoints(args.region, region, args.refresh_osm)
     return 0
 
 

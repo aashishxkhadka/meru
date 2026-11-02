@@ -1,0 +1,165 @@
+keep,id,name,name_ne,lat,lon,ele_m,rank,must_have,dem_m,diff_m,dem_max_500m,summit_offset_m,flags,description,prominence_m,osm_name,source
+Y,dhaulagiri-i,Dhaulagiri I,धौलागिरी,28.697609,83.489488,8167,1,Dhaulagiri I,8092,75,8117,199,renamed-from:Dhaulagiri,"The 7th-highest mountain on Earth; its name means 'white mountain'. The Kali Gandaki gorge, one of the deepest in the world, separates it from Annapurna.",3357,Dhaulagiri,osm:node/530579647
+Y,manaslu,Manaslu,मनास्लु,28.549983,84.559728,8163,1,Manaslu,8011,152,8030,50,DEM-DIFF:summit-smoothing,"The 8th-highest mountain on Earth, first climbed by a Japanese expedition in 1956. Its name means 'mountain of the spirit'.",3092,मनास्लु,osm:node/565159949
+Y,annapurna-i,Annapurna I,अन्नपूर्णा I,28.595806,83.819920,8091,1,Annapurna I,7888,203,7907,59,DEM-DIFF:summit-smoothing,"The 10th-highest mountain on Earth and the first 8,000 m peak ever climbed, by a French expedition in 1950. Its name means 'full of food', after the goddess of harvests.",2984,अन्नपूर्ण,osm:node/289923681
+Y,annapurna-middle-peak,Annapurna Middle Peak,,28.595574,83.827260,8013,1,,7879,134,7941,77,,,,Annapurna Middle Peak,osm:node/2883814659
+N,manaslu-east-pinnacle,Manaslu East Pinnacle,,28.554615,84.562379,7992,1,,7808,184,8030,541,DEM-DIFF:check-position,,,Manaslu East Pinnacle,osm:node/7872060427
+N,annapurna-east,Annapurna East,,28.597583,83.833434,7980,1,,7687,293,7885,559,DEM-DIFF:check-position,"One of the summits of the Annapurna I massif, along the ridge east of the main peak.",,Annapurna East,osm:node/2883814661
+Y,annapurna-ii,Annapurna II,अन्नपूर्णा II,28.534971,84.121822,7937,1,Annapurna II,7846,91,7866,75,,The eastern anchor of the Annapurna range and its second-highest summit after Annapurna I.,2467,अन्नपूर्णा II,osm:node/3588473785
+Y,himalchuli,Himalchuli,,28.437727,84.636696,7893,1,Himalchuli,7764,129,7844,213,renamed-from:Himachuli,"The highest peak of the Mansiri Himal, just south of Manaslu. Over 7,800 m, yet far less known than its neighbour.",1653,Himachuli,osm:node/1781744530
+Y,ngadi-chuli,Ngadi Chuli,,28.503927,84.567249,7871,1,,7701,170,7777,100,DEM-DIFF:summit-smoothing,,1121,Ngadi Chuli,osm:node/1078765330
+Y,dhaulagiri-ii,Dhaulagiri II,,28.763159,83.387379,7751,1,,7713,38,7721,84,,,2381,Dhaulagiri II,osm:node/3667795258
+Y,dhaulagiri-iii,Dhaulagiri III,,28.754026,83.377144,7715,1,,7664,51,7681,62,,,,Dhaulagiri III,osm:node/3667795257
+Y,dhaulagiri-iv,Dhaulagiri IV,,28.735749,83.314379,7661,1,,7565,96,7606,59,,,501,Dhaulagiri IV,osm:node/3667795253
+Y,baraha-shikhar-annapurna-fang-peak,Baraha Shikhar (Annapurna Fang Peak),,28.578303,83.800725,7647,1,,7423,224,7442,58,DEM-DIFF:summit-smoothing,"Also called Annapurna Fang: a steep, fang-shaped peak just west of Annapurna I.",,Baraha Shikhar (Annapurna Fang Peak),osm:node/2883814653
+Y,dhaulagiri-v,Dhaulagiri V,,28.734057,83.360579,7616,1,,7514,102,7551,61,,,416,Dhaulagiri V,osm:node/3544783617
+Y,annapurna-iii,Annapurna III,अन्नपूर्णा III,28.585351,83.989109,7555,1,Annapurna III,7482,73,7484,36,,A high summit in the middle of the Annapurna range. From Pokhara it rises just to the right of and behind Machhapuchhre.,725,अन्नपूर्णा III,osm:node/2935181986
+Y,annapurna-iv,Annapurna IV,अन्नपूर्णा IV,28.536893,84.083562,7525,1,Annapurna IV,7495,30,7519,67,,Sits close to Annapurna II on the eastern part of the Annapurna range.,,अन्नपूर्णा IV,osm:node/2966471204
+N,khangsar-kang,Khangsar Kang,,28.613696,83.871710,7485,1,,7184,301,7331,562,DEM-DIFF:check-position,,,Khāṅsar Kāṅ,osm:node/2883814654
+Y,gangapurna,Gangapurna,गङ्गापुर्ण,28.605655,83.963514,7455,1,Gangapurna,7382,73,7387,35,,Named after the goddess Ganga. It towers over the village of Manang on the north side of the Annapurna range.,,Gangapurna,osm:node/2935182022
+Y,dhaulagiri-vi,Dhaulagiri VI,,28.708390,83.273196,7268,1,,7219,49,7236,48,,,,Dhaulagiri VI,osm:node/3667795249
+Y,putha-hiunchuli,Putha Hiunchuli,,28.747922,83.145440,7246,1,,7172,74,7205,121,,,,Putha Hiunchuli,osm:node/3537642993
+Y,annapurna-south,Annapurna South,,28.518396,83.806343,7219,1,Annapurna South,7143,76,7166,40,,"The broad white peak that dominates the view from Pokhara, Ghandruk and Poon Hill. Also called Annapurna Dakshin or Moditse.",,Annapurna South,osm:node/727090665
+Y,mount-gurja,Mount Gurja,,28.674102,83.275664,7193,1,,7105,88,7134,59,,,,Gurja Himal,osm:node/3667795248
+Y,tarke-kang,Tarke Kang,,28.606903,83.888840,7168,1,,7150,18,7163,92,,,,Tarke Kang,osm:node/2883814670
+Y,nimjung,Nimjung,,28.736327,84.417796,7140,1,,7072,68,7076,15,,,1920,Nimjung,osm:node/3586337220
+Y,asapurna,Asapurna,,28.601464,83.941071,7140,1,,7082,58,7101,30,,,,Asapurna,osm:node/3586738424
+Y,tilicho-peak,Tilicho Peak,,28.682918,83.811479,7134,1,Tilicho Peak,7102,32,7104,289,,"Rises above Tilicho Lake, one of the highest lakes in the world, on the Annapurna Circuit side of the range.",,Tilicho Peak,osm:node/727440357
+Y,himlung,Himlung,,28.772330,84.421800,7126,1,,7012,114,7032,127,,,,Himlung,osm:node/3586337247
+Y,gama-peak,Gama Peak,,28.716579,83.276387,7120,1,,7107,13,7215,618,,,,Gama Peak,osm:node/3667795250
+Y,chamar,Chamar,,28.555085,84.943723,7100,1,,7113,-13,7139,37,,,2007,Chamar,osm:node/3619467959
+Y,junction-peak,Junction Peak,,28.721745,83.276516,7080,1,,7064,16,7123,519,,,,Junction Peak,osm:node/3667795251
+N,thulagi-chuli,Thulagi Chuli,,28.528885,84.523315,7069,1,,6891,178,6994,303,DEM-DIFF:check-position,,,Thulagi Chuli,osm:node/11380918399
+Y,tare-kang,Tare Kang,,28.605258,83.913690,7069,1,,7039,30,7045,19,,,,Tare Kang,osm:node/3586738432
+Y,nilgiri-north,Nilgiri North,,28.689076,83.744055,7061,1,Nilgiri North,6957,104,6977,64,,"The highest of the three Nilgiri ('blue mountain') peaks, standing above Jomsom in the Kali Gandaki valley.",,Nilgiri North,osm:node/2642085739
+Y,gyaji-kang,Gyaji Kang,,28.734933,84.366936,7038,1,,6929,109,7006,148,,,,Gyaji Kang,osm:node/2967385868
+Y,ratna-chuli,Ratna Chuli,,28.864980,84.375236,7035,1,,6996,39,7012,80,,,,热德纳峰  Ratna Chuli,osm:node/11392096568
+Y,machhapuchhre,Machhapuchhre,माछापुच्छ्रे,28.497980,83.945876,6993,1,Machhapuchhre,6840,153,6849,45,renamed-from:Machapuchare DEM-DIFF:summit-smoothing,"The 'Fishtail' mountain, named for its split twin summit. Sacred to Shiva and closed to climbing; its summit has never officially been reached.",1293,Machapuchare,osm:node/727108156
+Y,lamjung-himal,Lamjung Himal,,28.489508,84.188609,6983,1,Lamjung Himal,6963,20,6966,68,,"The easternmost high peak of the Annapurna range, above the Lamjung district.",,Lamjung Himal,osm:node/2935179265
+Y,tukuche-peak,Tukuche Peak,,28.744953,83.557406,6920,1,Tukuche Peak,6831,89,6845,72,,"A high peak in the Dhaulagiri Himal, rising above the Kali Gandaki valley and the village of Tukuche.",,Tukuche Peak,osm:node/727451270
+Y,hiunchuli,Hiunchuli,,28.510000,83.850000,6441,1,Hiunchuli,6331,110,6378,131,,Stands in front of Annapurna South and guards the entrance to the Annapurna Sanctuary.,,Hiunchuli,osm:node/727097756
+Y,gandharba-chuli,Gandharba Chuli,,28.539169,83.959837,6248,1,Gandharba Chuli,6121,127,6140,73,renamed-from:Gandharwa_Chuli,"A sharp peak on the rim of the Annapurna Sanctuary, close to Machhapuchhre.",,Gandharwa Chuli,osm:node/2935179295
+Y,tent-peak-tharpu-chuli,Tent Peak (Tharpu Chuli),,28.561720,83.889699,5695,1,Tent Peak (Tharpu Chuli),5623,72,5646,42,renamed-from:Tharpu_Chuli,"A popular trekking peak climbed from Annapurna Base Camp, named for its tent-like shape.",,Tharpu Chuli,osm:node/2935202256
+Y,mardi-himal,Mardi Himal,,28.473769,83.927535,5553,1,Mardi Himal,5504,49,5513,37,,"The small summit at the foot of Machhapuchhre, which gives its name to the popular Mardi Himal trek.",,Mardi Himal,osm:node/5612192705
+Y,manaslu-north,Manaslu North,,28.583923,84.549137,6994,2,,6850,144,6857,42,,,,Manaslu North,osm:node/3587671152
+Y,kang-guru,Kang Guru,,28.658155,84.300885,6981,2,,6911,70,6940,130,,,,Kang Guru,osm:node/3586371584
+Y,kaya-chuli,Kaya Chuli,,28.773258,83.240181,6975,2,,6858,117,6921,150,,,,Kaya Chuli,osm:node/12547685135
+Y,nilgiri-central,Nilgiri Central,,28.678379,83.735384,6940,2,,6807,133,6822,515,,,,Nilgiri Central,osm:node/2642085747
+N,osm-3578217886,卢古拉康日,,28.896559,84.260071,6900,2,,6863,37,6877,133,NEEDS-ENGLISH-NAME,,,卢古拉康日,osm:node/3578217886
+Y,nilgiri-south,Nilgiri South,,28.654108,83.729646,6839,2,,6569,270,6578,53,DEM-DIFF:summit-smoothing,,,Nilgiri South,osm:node/727458457
+Y,khumjungar,Khumjungar,,28.888992,84.126882,6759,2,,6707,52,6726,90,,,,Khumjungar,osm:node/3578217861
+Y,chombi,Chombi,,28.687513,84.325031,6704,2,,6626,78,6645,65,,,,Chombi,osm:node/3586373805
+N,rani-peak,Rani Peak,,28.461454,84.686938,6693,2,,6542,151,6668,533,DEM-DIFF:check-position,,,Rani peak,osm:node/11072668363
+Y,bhauda-himal,Bhauda Himal,,28.376229,84.676811,6672,2,,6575,97,6622,106,,,,Bhauda Himal,osm:node/1781732628
+Y,chhiv-himal,Chhiv Himal,,28.873629,84.159884,6650,2,,6573,77,6598,32,,,,Chhiv Himal,osm:node/4765460721
+Y,mukut-himal,Mukut Himal,,28.779789,83.460735,6639,2,,6563,76,6576,86,,,,Mukut Himal,osm:node/3667795260
+Y,pangpoche-i,Pangpoche I,,28.629594,84.682300,6620,2,,6483,137,6525,633,,,1622,Pangpoche I,osm:node/3619184773
+Y,sita-chuchura,Sita Chuchura,,28.782078,83.483832,6611,2,,6469,142,6554,584,,,,Sita Chuchura,osm:node/5612192693
+Y,chulu,Chulu,,28.736823,84.035097,6584,2,,6486,98,6503,134,,,,Chulu,osm:node/727448632
+Y,konabon-peak,Konabon Peak,,28.659996,83.304856,6570,2,,6452,118,6478,54,,,,Konabon Peak,osm:node/3667795245
+Y,phu-khang-north,Phu Khang North,,28.814101,84.430504,6566,2,,6522,44,6544,159,,,,Phu Khang North,osm:node/13159444217
+Y,hongde,Hongde,,28.843187,83.496775,6556,2,,6452,104,6472,69,,,,Hongde,osm:node/5421313853
+Y,dogari-himal,Dogari Himal,,28.767302,83.098742,6536,2,,6486,50,6505,84,,,,Dogari Himal,osm:node/3537643239
+Y,ghustang,Ghustang,,28.681015,83.245366,6529,2,,6480,49,6492,81,,,,Ghustang,osm:node/12537507163
+Y,phungi,Phungi,,28.830673,84.400829,6524,2,,6447,77,6472,125,,,,Phungi,osm:node/13159444216
+N,singu-chuli,Singu Chuli,,28.587826,83.882960,6501,2,,6323,178,6426,590,DEM-DIFF:check-position,,,Singu Chuli,osm:node/3017155224
+Y,purpung-himal,Purpung Himal,,28.800597,84.016799,6500,2,,6369,131,6372,57,,,,Purpung Himal,osm:node/3578202969
+Y,khatung-kang,Khatung Kang,,28.777777,83.918292,6484,2,,6404,80,6426,47,,,,Khatung Kang,osm:node/3552319136
+Y,yakawa-kang,Yakawa Kang,,28.808901,83.941934,6482,2,,6467,15,6477,22,,,,Yakawa Kang,osm:node/727127535
+Y,chulu-east,Chulu East,,28.725103,84.052158,6429,2,,6382,47,6396,58,,,,Chulu East,osm:node/3588472635
+Y,karma-himal,Karma Himal,,28.783650,84.397131,6421,2,,6398,23,6399,12,,,,Karma Himal,osm:node/12363352632
+Y,chulu-west,Chulu West,,28.745405,84.022832,6419,2,,6294,125,6377,800,,,,Chulu West,osm:node/1367816359
+Y,tsaurabong-peak,Tsaurabong Peak,,28.689171,83.379961,6395,2,,6330,65,6344,59,,,,Tsaurabong Peak,osm:node/3544783599
+Y,amotsang,Amotsang,,28.835161,84.169925,6393,2,,6288,105,6304,44,,,,Amotsang,osm:node/13159444223
+Y,manapathi-east,Manapathi East,,28.651593,83.467220,6384,2,,6309,75,6328,102,,,,Manapathi East,osm:node/3669384735
+Y,manapathi,Manapathi,,28.647609,83.455348,6380,2,,6164,216,6179,35,DEM-DIFF:summit-smoothing,,,Manapathi,osm:node/3669384733
+Y,nagoru-lake-peak,Nagoru Lake Peak,,28.844507,84.344359,6374,2,,6293,81,6311,173,,,,Nagoru Lake Peak,osm:node/3589375508
+Y,pokarkang,Pokarkang,,28.813321,84.226942,6372,2,,6312,60,6316,83,,,,Pokarkang,osm:node/5612192701
+Y,bhrikuti-shail,Bhrikuti Shail,,28.893082,84.226156,6361,2,,6331,30,6346,182,name-from-alt_name,,,普丽古蒂塞尔,osm:node/3578217872
+Y,honde-himal,Honde Himal,,28.844795,83.481727,6338,2,,6240,98,6272,52,,,,Honde Himal,osm:node/5421301060
+Y,samdo-himal,Samdo Himal,साम्डो ही माल,28.636402,84.694665,6335,2,,6263,72,6450,612,,,,桑木多雪山 साम्डो ही माल,osm:node/9201409043
+Y,saribung-peak,Saribung Peak,,28.885000,84.171912,6328,2,,6287,41,6354,751,,,,Saribung Peak,osm:node/4763144380
+Y,kang-tokal,Kang Tokal,,28.800126,83.166475,6294,2,,6209,85,6218,39,,,,Kāṅg Tokal,osm:node/12537507153
+Y,myagumath,Myagumath,,28.661870,83.321115,6273,2,,6195,78,6207,27,,,,Myagumath,osm:node/3667795246
+Y,larkya-peak,Larkya Peak,,28.627987,84.543531,6249,2,,6030,219,6285,244,DEM-DIFF:summit-smoothing,,,Larkya Peak,osm:node/3586812587
+Y,saula-himal,Saula Himal,,28.613760,84.753941,6235,2,,6188,47,6192,63,name-from-alt_name,,,古当康日东峰,osm:node/2641486136
+Y,manshail,Manshail,,29.301743,83.812356,6235,2,,6092,143,6139,77,name-from-alt_name,,,曼塞尔,osm:node/9201090722
+Y,naike-peak,Naike Peak,,28.606942,84.587817,6211,2,,6151,60,6160,19,,,,Naike Peak,osm:node/7872060428
+Y,tongu-himal,Tongu Himal,,28.871469,83.503376,6200,2,,6136,64,6155,136,,,,Tongu Himal,osm:node/5420218656
+Y,sahasar,Sahasar,,28.855559,84.207473,6188,2,,6082,106,6086,41,,,,Sahasar,osm:node/13159444219
+Y,mahendra-peak,Mahendra Peak,,28.642508,83.926959,6170,2,,6050,120,6080,84,,,,Mahendra Peak,osm:node/2935182090
+Y,khayang-peak,Khayang Peak,,28.630654,84.716466,6168,2,,6072,96,6090,488,,,,卡羊康日 Khayang Peak,osm:node/14284091373
+Y,purkung,Purkung,,28.827963,83.982407,6166,2,,6132,34,6139,194,,,,Purkung,osm:node/3589375505
+Y,nagoru-central,Nagoru Central,,28.847266,84.302031,6165,2,,6116,49,6125,21,,,,Nagoru Central,osm:node/3589375510
+Y,nagoru-east,Nagoru East,,28.841507,84.308126,6145,2,,6069,76,6114,790,,,,Nagoru East,osm:node/3589375507
+Y,nagoru-far-east,Nagoru Far East,,28.845527,84.326756,6145,2,,6123,22,6129,34,,,,Nagoru Far East,osm:node/3589375509
+Y,thorong-peak,Thorong Peak,,28.781969,83.926878,6144,2,,6108,36,6242,609,,,,Thorong Peak,osm:node/727130032
+Y,jinjang,Jinjang,,28.784900,84.032194,6111,2,,6066,45,6073,58,,,,Jinjang,osm:node/5612192720
+Y,gaugiri,Gaugiri,,29.045897,84.187923,6110,2,,6075,35,6084,53,name-from-alt_name,,,苟吉里,osm:node/3578218071
+Y,pisang-peak,Pisang Peak,,28.648653,84.188090,6091,2,,5953,138,6054,250,,,,Pisang Peak,osm:node/3588472637
+Y,mukot-himal,Mukot Himal,,28.817038,83.480211,6087,2,,6040,47,6045,61,,,,Mukot Himal,osm:node/5421301061
+Y,norbung-kang,Norbung Kang,,29.120261,83.073533,6085,2,,5951,134,5978,62,,,,Norbung Kang,osm:node/3928797970
+Y,nagoru-west,Nagoru West,,28.852103,84.296550,6075,2,,6024,51,6125,776,,,,Nagoru West,osm:node/13159444215
+Y,jirbang,Jirbang,,28.623254,83.448944,6062,2,,6012,50,6024,58,,,,Jirbang,osm:node/3669384729
+Y,chanmar-lek,Chanmar Lek,,29.235517,83.361154,6050,2,,6026,24,6032,14,,,,Chanmar Lek,osm:node/3925094121
+Y,chulu-far-east,Chulu Far East,,28.730828,84.085445,6038,2,,5976,62,6010,166,,,,Chulu Far East,osm:node/3588472636
+Y,kyangkung-dula,Kyangkung Dula,,29.217684,83.839776,6037,2,,6000,37,6006,32,,,,Kyangkung Dula,osm:node/3574378517
+Y,araniko-chuli,Araniko Chuli,,29.176593,83.656591,6034,2,,5967,67,6009,61,,,,阿尼哥峰 Araniko Chuli,osm:node/575909762
+Y,syagang,Syagang,,28.766909,83.939257,6026,2,,5920,106,5928,53,,,,Syagang,osm:node/3589375512
+Y,dhampus-peak,Dhampus Peak,,28.797951,83.606446,6012,2,,5975,37,6020,225,,,,Thapa Peak,osm:node/2865346152
+Y,tewa-himal,Tewa Himal,,28.411461,84.994317,6008,2,,5876,132,5882,89,,,,Tewa Himal,osm:node/3620710238
+Y,dhechyan-kang,Dhechyan Kang,,29.036348,84.250727,6000,2,,5994,6,6007,112,,,,Dhechyan Kang,osm:node/3578218066
+Y,chhachung,Chhachung,,28.581970,84.869305,5996,3,,5898,98,5933,118,name-from-alt_name,,,查尊康日,osm:node/9201409044
+Y,sechi-lek,Sechi Lek,,28.812556,83.608705,5981,3,,5936,45,5951,100,,,,Sechi Lek,osm:node/3589375511
+N,amatsan-himal,Amatsan Himal,,28.840863,84.153633,5975,3,,6294,-319,6297,45,DEM-DIFF:check-position,,,Amatsan Himal,osm:node/5612193353
+Y,gyala-peak,Gyala Peak,,28.735147,84.571620,5973,3,,5924,49,5941,842,,,,甲拉康 Gyala Peak,osm:node/11072600096
+Y,teri-himal,Teri Himal,,28.844395,84.051002,5935,3,,5886,49,5893,61,,,,Teri Himal,osm:node/3552379174
+Y,samjang,Samjang,,28.786597,83.079799,5924,3,,5800,124,5817,58,,,,Samjaṅ,osm:node/12537507151
+Y,chanabolo,Chanabolo,,29.180946,83.607090,5897,3,,5863,34,5866,34,name-from-alt_name,,,扎那卧洛,osm:node/9201073305
+Y,lapchung,Lapchung,,28.570411,84.857116,5880,3,,5800,80,5833,186,,,,拉不尊康日 Lapchung,osm:node/3619467971
+Y,jhyarko-dingla,Jhyarko Dingla,,29.101339,83.045010,5850,3,,5762,88,5788,707,,,,Jhyarko Dingla,osm:node/3922381340
+Y,kirphuk-lek,Kirphuk Lek,,29.239765,83.327013,5850,3,,5777,73,5796,77,,,,Kirphuk Lek,osm:node/3925094125
+Y,tagachhyu,Tagachhyu,,28.808646,83.182453,5790,3,,5728,62,5742,38,,,,Tagachhyu,osm:node/13602264249
+Y,ruyachaur-dhuri,Ruyachaur Dhuri,,28.614969,83.464146,5724,3,,5594,130,5611,63,,,,Ruyachaur Dhuri,osm:node/3541336394
+N,osm-3619467975,巴马康日,,28.587439,84.971424,5590,3,,5571,19,5623,588,NEEDS-ENGLISH-NAME,,,巴马康日,osm:node/3619467975
+Y,tasa-peak,Tasa Peak,,28.680767,84.672608,5543,3,,5495,48,5504,74,,,,大沙康日 Tasa Peak,osm:node/11072616646
+Y,5410,5410,,29.174133,83.097949,5410,3,,5365,45,5455,647,,,,5410,osm:node/13503680446
+Y,himnadi-chuli,Himnadi Chuli,,28.768091,84.365552,5408,3,,5378,30,5438,716,,,,Himnadi Chuli,osm:node/12363352611
+Y,chhaamjo,Chhaamjo,,28.671433,84.704514,5382,3,,5331,51,5337,21,,,,查安觉,osm:node/9201409037
+Y,buddha-ri,Buddha Ri,,29.163973,83.197506,5370,3,,5367,3,5376,124,,,,Buddha Ri,osm:node/3925860439
+Y,thoran-phedi,Thorang Phedi,,28.775935,83.961654,5350,3,,5293,57,5331,53,,,,Thoraṅ Phedi,osm:node/6123597263
+Y,dingla-dhuri,Dingla Dhuri,,28.965348,83.025378,5348,3,,5257,91,5280,613,,,,Dingla Dhuri,osm:node/12551655939
+Y,gundang,Gundang,,28.761796,83.987022,5312,3,,5265,47,5273,97,,,,Gundang,osm:node/5612193323
+Y,gyu-la-peak-east,Gyu La Peak East,,28.848256,83.890950,5252,3,,5196,56,5216,76,,,,Gyu La Peak East,osm:node/14253329976
+Y,5215,5215,,29.159484,83.035970,5215,3,,5213,2,5299,608,,,,5215,osm:node/3629580276
+Y,chaklo,Chaklo,,29.294092,84.089085,5177,3,,5160,17,5167,62,,,,恰克洛 Chaklo,osm:node/9201090937
+Y,samdo-peak,Samdo Peak,,28.670341,84.646448,5177,3,,5139,38,5188,493,,,,Samdo Peak,osm:node/1782547419
+Y,buddha-ri-2,Buddha Ri,,29.173508,83.191654,5167,3,,5122,45,5389,660,,,,Buddha Ri,osm:node/13505345982
+Y,panglamo,Panglamo,,29.284891,84.068875,5156,3,,5139,17,5146,77,name-from-alt_name,,,邦拉莫,osm:node/9201090935
+Y,pawo-ri,Pawo Ri,,29.142863,83.232950,5155,3,,5168,-13,5265,631,,,,Pawo Ri,osm:node/12569490298
+Y,om-myurpa,Om Myurpa,,28.660342,83.907306,5039,3,,5009,30,5060,548,,,,Om Myurpa,osm:node/3589375080
+Y,sarpang-dhuri,Sarpang Dhuri,,28.613096,83.562021,5007,3,,4929,78,4953,90,,,,Sarpang Dhuri,osm:node/3541334392
+Y,gurusangbo,Gurusangbo,,28.781081,84.267456,4746,3,,4703,43,4801,674,,,,Gurusangbo,osm:node/12360202211
+Y,malbas,Malbas,,28.624828,83.355095,4625,3,,4552,73,4601,147,,,,Malbas,osm:node/5612192706
+Y,dho-ri,Dho Ri,,29.115957,83.190179,4578,3,,4542,36,4649,648,,,,Dho Ri,osm:node/13506877285
+Y,sundar,Sundar,,28.427310,84.328115,4331,3,,4264,67,4267,70,,,,Sundar,osm:node/3590315265
+Y,tara-peak,Tara Peak,,29.221170,83.958798,4122,3,,4108,14,4141,571,,,,Tara Peak,osm:node/14185270611
+Y,paa-peak-east,Paa Peak East,,28.938508,83.893275,4023,3,,4038,-15,4079,546,,,,Paa Peak East,osm:node/14253329974
+Y,paa-peak-east-2,Paa Peak East,,28.938627,83.879229,4012,3,,4026,-14,4036,49,,,,Paa Peak East,osm:node/14253329975
+Y,puchchhardanda,Puchchhardanda,,28.816491,83.808856,3971,3,,3946,25,3950,76,,,,Puchchhardanda,osm:node/6123605203
+Y,syangbochen-view-point,Syangbochen View Point,,28.981155,83.839651,3923,3,,3893,30,3901,12,,,,syangbochen View Point,osm:node/11725957918
+Y,dhangladanda,Dhangladanda,,28.806244,83.830845,3918,3,,3900,18,3904,100,,,,Dhangladanda,osm:node/6123605768
+Y,jugja-pahad,Jugja Pahad,,28.471127,83.293430,3721,3,,3680,41,3686,34,,,,Jugja Pahad,osm:node/3921968383
+Y,muldai,Muldai,,28.420502,83.732983,3637,3,,3631,6,3634,83,,,,Muldai,osm:node/4813044043
+Y,bhitribang,Bhitribang,,28.356199,83.302549,3531,3,,3500,31,3511,46,,,,Bhitribang,osm:node/5612193348
+Y,asnam-dhuri,Asnam Dhuri,,28.534122,83.444909,3507,3,,3480,27,3488,60,,,,Asnam Dhuri,osm:node/5612193350
+Y,mohare-danda,Mohare Danda,माेहरे डाँडा,28.371366,83.679409,3313,3,,3290,23,3299,103,,,,Mohare Danda,osm:node/6076327370
+Y,barun-dhuri,Barun Dhuri,,28.530945,83.396524,3273,3,,3290,-17,3298,65,,,,Barun Dhuri,osm:node/5612193349
+Y,poon-hill,Poon Hill,,28.400043,83.689540,3210,3,,3177,33,3181,42,,,,Pun Danda,osm:node/316997699
+Y,dadar-dhuri,Dadar Dhuri,,28.537407,83.314017,3175,3,,3104,71,3198,733,,,,Dadar Dhuri,osm:node/3690065007
+Y,malka-pahad,Malka Pahad,,28.444205,83.438125,3169,3,,3143,26,3156,74,,,,Malka Pahad,osm:node/3661955886
+Y,kurpu-danda,Kurpu Danda,,28.308477,84.148462,3050,3,,3053,-3,3067,41,,,,Kurpu Danda,osm:node/3501754391
+Y,khusap-gumba,Khusap Gumba,,28.765397,83.707171,2956,3,,2930,26,2933,9,,,,Khusap Gumba,osm:node/12039492522
+Y,gurung-hill-tower-panchase,Gurung Hill Tower/Panchase,,28.230033,83.795095,2515,3,,2478,37,2485,59,,,,Gurung Hill Tower/Panchase,osm:node/3476013204
+Y,sarangkot-tower,Sarangkot Tower,सराङ्गकोट टावर,28.246251,83.948753,1592,3,,1567,25,1567,82,,,,Sarangkot Tower,osm:node/570126093
+Y,liglig,Liglig,लिलिग,28.062426,84.526625,1418,3,,1408,10,1412,59,,,,Liglig,osm:node/2637460419

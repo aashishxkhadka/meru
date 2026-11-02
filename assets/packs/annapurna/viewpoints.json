@@ -1,0 +1,101 @@
+[
+  {
+    "id": "sarangkot",
+    "name": "Sarangkot",
+    "nameNe": "",
+    "lat": 28.246253,
+    "lon": 83.948809,
+    "eyeHeightM": 1.7,
+    "source": "osm:node/3485963579"
+  },
+  {
+    "id": "world-peace-pagoda",
+    "name": "World Peace Pagoda",
+    "nameNe": "विश्व शान्ति स्तुपा",
+    "lat": 28.201031,
+    "lon": 83.944741,
+    "eyeHeightM": 1.7,
+    "source": "osm:way/596603713"
+  },
+  {
+    "id": "pokhara-lakeside",
+    "name": "Pokhara Lakeside (Phewa)",
+    "nameNe": "फेवा लेक भिउ पोइन्ट",
+    "lat": 28.214786,
+    "lon": 83.955723,
+    "eyeHeightM": 1.7,
+    "source": "osm:node/4161865224"
+  },
+  {
+    "id": "pumdikot",
+    "name": "Pumdikot",
+    "nameNe": "",
+    "lat": 28.199947,
+    "lon": 83.92982,
+    "eyeHeightM": 1.7,
+    "source": "osm:node/4666814990"
+  },
+  {
+    "id": "australian-camp",
+    "name": "Australian Camp",
+    "nameNe": "",
+    "lat": 28.304464,
+    "lon": 83.828295,
+    "eyeHeightM": 1.7,
+    "source": "osm:node/1366597402"
+  },
+  {
+    "id": "dhampus",
+    "name": "Dhampus",
+    "nameNe": "धम्पुस",
+    "lat": 28.300303,
+    "lon": 83.858681,
+    "eyeHeightM": 1.7,
+    "source": "osm:node/988616263"
+  },
+  {
+    "id": "poon-hill",
+    "name": "Poon Hill",
+    "nameNe": "",
+    "lat": 28.400109,
+    "lon": 83.689511,
+    "eyeHeightM": 1.7,
+    "source": "osm:way/366056404"
+  },
+  {
+    "id": "ghandruk",
+    "name": "Ghandruk",
+    "nameNe": "घान्द्रुक",
+    "lat": 28.376865,
+    "lon": 83.807793,
+    "eyeHeightM": 1.7,
+    "source": "osm:node/388572114"
+  },
+  {
+    "id": "annapurna-base-camp",
+    "name": "Annapurna Base Camp",
+    "nameNe": "",
+    "lat": 28.530748,
+    "lon": 83.877845,
+    "eyeHeightM": 1.7,
+    "source": "osm:way/620058337"
+  },
+  {
+    "id": "machhapuchhre-base-camp",
+    "name": "Machhapuchhre Base Camp",
+    "nameNe": "",
+    "lat": 28.526566,
+    "lon": 83.907798,
+    "eyeHeightM": 1.7,
+    "source": "osm:way/620058338"
+  },
+  {
+    "id": "mardi-himal-high-camp",
+    "name": "Mardi Himal High Camp",
+    "nameNe": "",
+    "lat": 28.433487,
+    "lon": 83.86776,
+    "eyeHeightM": 1.7,
+    "source": "osm:node/1747989125"
+  }
+]

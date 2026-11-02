@@ -91,6 +91,10 @@ npm run ios                # npx expo run:ios
 python3 -m venv tools/pipeline/.venv && tools/pipeline/.venv/bin/pip install -r tools/pipeline/requirements.txt
 tools/pipeline/.venv/bin/python tools/pipeline/build_pack.py --region annapurna   # tiles cached in tools/pipeline/cache/
 tools/pipeline/.venv/bin/python tools/pipeline/build_pack.py --region annapurna --list-tiles
+tools/pipeline/.venv/bin/python tools/pipeline/build_pack.py --region annapurna --only peaks viewpoints
+tools/pipeline/.venv/bin/python tools/pipeline/build_pack.py --region annapurna --finalize-peaks  # reviewed CSV -> peaks.json
+# peaks.review.csv and peaks.json are never overwritten without --force (they hold human review).
+# Region config (bbox, must-have peaks, viewpoint OSM ids) lives in tools/pipeline/regions.py.
 tools/pipeline/.venv/bin/python tools/pipeline/elev.py 28.2442 83.9486           # spot-check elevation at lat lon
 ```
 
