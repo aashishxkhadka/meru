@@ -23,8 +23,12 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "permissions": ["android.permission.CAMERA"],
-      "blockedPermissions": ["android.permission.RECORD_AUDIO"]
+      "permissions": [
+        "android.permission.CAMERA"
+      ],
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -60,10 +64,13 @@
           "photosPermission": "Meru saves your labelled mountain photos to your gallery.",
           "savePhotosPermission": "Meru saves your labelled mountain photos to your gallery.",
           "isAccessMediaLocationEnabled": false,
-          "granularPermissions": ["photo"]
+          "granularPermissions": [
+            "photo"
+          ]
         }
       ],
-      "expo-dev-client"
+      "expo-dev-client",
+      "expo-font"
     ],
     "backgroundColor": "#0b1220"
   }
