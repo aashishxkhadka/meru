@@ -45,7 +45,13 @@ export const strings = {
     samplePeaks: 'Example peaks in this pack',
   },
   calibration: { title: 'Calibrate' },
-  panorama: { title: 'Panorama' },
+  panorama: {
+    title: 'Panorama',
+    noScene: 'Pick a viewpoint or wait for GPS to see the panorama.',
+    followCompass: 'Follow compass',
+    followingCompass: '· following compass',
+    dragHint: '· drag to look around',
+  },
   peak: {
     visibleFromHere: 'Visible from here',
     yes: 'Yes',

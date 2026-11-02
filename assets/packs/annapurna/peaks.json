@@ -36,18 +36,6 @@
     "source": "osm:node/289923681"
   },
   {
-    "id": "annapurna-middle-peak",
-    "name": "Annapurna Middle Peak",
-    "nameNe": "",
-    "lat": 28.595574,
-    "lon": 83.82726,
-    "elevationM": 8013,
-    "prominenceM": null,
-    "rank": 1,
-    "description": "",
-    "source": "osm:node/2883814659"
-  },
-  {
     "id": "annapurna-ii",
     "name": "Annapurna II",
     "nameNe": "अन्नपूर्णा II",
@@ -454,6 +442,18 @@
     "rank": 1,
     "description": "The small summit at the foot of Machhapuchhre, which gives its name to the popular Mardi Himal trek.",
     "source": "osm:node/5612192705"
+  },
+  {
+    "id": "annapurna-middle-peak",
+    "name": "Annapurna Middle Peak",
+    "nameNe": "",
+    "lat": 28.595574,
+    "lon": 83.82726,
+    "elevationM": 8013,
+    "prominenceM": null,
+    "rank": 2,
+    "description": "",
+    "source": "osm:node/2883814659"
   },
   {
     "id": "manaslu-north",

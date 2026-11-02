@@ -49,3 +49,6 @@ __pycache__/
 
 # Jest coverage output
 coverage/
+
+# Skia web runtime (copied by npm postinstall)
+public/canvaskit.wasm

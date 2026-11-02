@@ -14,7 +14,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "elev": "tsx scripts/elev.ts",
-    "panorama": "tsx scripts/panorama.ts"
+    "panorama": "tsx scripts/panorama.ts",
+    "postinstall": "setup-skia-web public"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
