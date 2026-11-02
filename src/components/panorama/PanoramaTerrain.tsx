@@ -54,7 +54,7 @@ export default function PanoramaTerrain({ horizon, layout, centerDeg }: Panorama
         <LinearGradient
           start={vec(0, 0)}
           end={vec(0, layout.terrainBottom)}
-          colors={['#5f8fbf', '#c9dcef']}
+          colors={['#3f6d9c', '#9cc0e2', '#d6e6f4']}
         />
       </Rect>
       {copies.map((x) => (

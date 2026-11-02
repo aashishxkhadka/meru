@@ -60,6 +60,7 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen name="viewpoints" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="peaks" options={{ presentation: 'modal' }} />
         <Stack.Screen name="photo-preview" options={{ presentation: 'modal' }} />
       </Stack>
       <StatusBar style="light" />

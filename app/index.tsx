@@ -1,62 +1,283 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useEffect } from 'react';
-import { ActivityIndicator, Text } from 'react-native';
+import { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { circularMeanDeg, wrapTo180 } from '../src/core/angles';
-import { LocationStatus } from '../src/components/LocationStatus';
-import { NavButton, Placeholder, Screen, screenStyles } from '../src/components/Screen';
-import { colors } from '../src/components/theme';
+import { circularMeanDeg } from '../src/core/angles';
+import { Panorama } from '../src/components/panorama/Panorama';
+import { colors, radius, space } from '../src/components/theme';
+import { Button, EmptyState, type IconName } from '../src/components/ui';
 import { useLocationStore } from '../src/store/locationStore';
+import { useOrientationStore } from '../src/store/orientationStore';
 import { useSceneStore } from '../src/store/sceneStore';
 import { strings } from '../src/strings';
 
-const compass = (az: number) =>
-  ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][Math.round(az / 45) % 8];
+const TOP_BAR = 56;
+const BOTTOM_BAR = 64;
+const COMPASS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
 
-/** Camera view (home, SPEC 3.2). Until step 8 it lists the visible peaks instead of a camera. */
-export default function CameraScreen() {
-  const { source, gpsStatus, startGps } = useLocationStore();
-  const { status, scene } = useSceneStore();
+/**
+ * Home (SPEC 3.2 layout). Until the camera arrives in step 8, the live view is the drawn
+ * panorama: location chip + heading on top, Places / Peaks / Info at the bottom.
+ */
+export default function Home() {
+  const insets = useSafeAreaInsets();
+  const { width, height } = useWindowDimensions();
+  const location = useLocationStore();
+  const { status, scene, label } = useSceneStore();
+  const orientation = useOrientationStore();
+  const [follow, setFollow] = useState(orientation.supported);
+  const [manualDeg, setManualDeg] = useState<number | null>(null);
 
+  // Start GPS on first open (onboarding will ask first, step 11).
+  const { source, gpsStatus, startGps } = location;
   useEffect(() => {
     if (source === 'gps' && gpsStatus === 'idle') startGps();
   }, [source, gpsStatus, startGps]);
+  const { supported, start, stop } = orientation;
+  useEffect(() => {
+    if (!supported) return;
+    start();
+    return stop;
+  }, [supported, start, stop]);
 
-  // Left to right as you face the main peaks (like the panorama).
-  const all = scene?.peaks ?? [];
-  const main = all.filter((r) => r.visible && r.peak.rank === 1).map((r) => r.azimuthDeg);
-  const centerDeg = main.length ? circularMeanDeg(main) : 0;
-  const visible = all
-    .filter((r) => r.visible)
-    .sort((a, b) => wrapTo180(a.azimuthDeg - centerDeg) - wrapTo180(b.azimuthDeg - centerDeg));
-  const hiddenCount = (scene?.peaks.length ?? 0) - visible.length;
+  const mainPeaks =
+    scene?.peaks.filter((r) => r.visible && r.peak.rank === 1).map((r) => r.azimuthDeg) ?? [];
+  const defaultDeg = mainPeaks.length ? circularMeanDeg(mainPeaks) : 0;
+  const following = follow && orientation.headingDeg !== null;
+  const centerDeg = following ? orientation.headingDeg! : (manualDeg ?? defaultDeg);
+  const panoHeight = height - insets.bottom - BOTTOM_BAR;
 
   return (
-    <Screen title={strings.appName} back={false}>
-      <LocationStatus />
-      <NavButton label={strings.camera.panorama} onPress={() => router.push('/panorama')} />
-      <NavButton label={strings.camera.calibrate} onPress={() => router.push('/calibration')} />
-      <NavButton label={strings.camera.about} onPress={() => router.push('/about')} />
-      <Placeholder step={8} />
+    <View style={styles.root}>
+      {scene ? (
+        <Panorama
+          scene={scene}
+          width={width}
+          height={panoHeight}
+          centerDeg={centerDeg}
+          topInset={insets.top + TOP_BAR}
+          onDrag={(deg) => {
+            setFollow(false);
+            setManualDeg(deg);
+          }}
+          onPeakPress={(id) => router.push({ pathname: '/peak/[id]', params: { id } })}
+        />
+      ) : (
+        <View style={[styles.emptyArea, { height: panoHeight, paddingTop: insets.top + TOP_BAR }]}>
+          <NoScene />
+        </View>
+      )}
 
-      {status === 'computing' && (
-        <Text style={screenStyles.muted}>
-          <ActivityIndicator color={colors.accent} size="small" /> {strings.scene.computing}
-        </Text>
-      )}
-      {scene && (
-        <>
-          <Text style={screenStyles.section}>{strings.scene.visibleTitle(visible.length)}</Text>
-          {visible.map((r) => (
-            <NavButton
-              key={r.peak.id}
-              label={`${r.peak.name} · ${r.peak.elevationM} m · ${(r.distanceM / 1000).toFixed(0)} km · ${compass(r.azimuthDeg)} ${r.azimuthDeg.toFixed(0)}°`}
-              onPress={() => router.push({ pathname: '/peak/[id]', params: { id: r.peak.id } })}
-            />
-          ))}
-          <Text style={screenStyles.muted}>{strings.scene.hiddenNote(hiddenCount)}</Text>
-        </>
-      )}
-    </Screen>
+      {/* top bar */}
+      <View style={[styles.topBar, { top: insets.top + space.sm }]} pointerEvents="box-none">
+        <Pressable
+          style={({ pressed }) => [styles.chip, pressed && { opacity: 0.7 }]}
+          onPress={() => router.push('/viewpoints')}
+          accessibilityRole="button"
+        >
+          <Ionicons
+            name={location.source === 'simulated' ? 'location' : 'navigate'}
+            size={16}
+            color={colors.accent}
+          />
+          <Text style={styles.chipText} numberOfLines={1}>
+            {chipLabel(location, label)}
+          </Text>
+          {status === 'computing' ? (
+            <ActivityIndicator size="small" color={colors.muted} />
+          ) : (
+            <Ionicons name="chevron-down" size={16} color={colors.muted} />
+          )}
+        </Pressable>
+        {scene ? (
+          <Pressable
+            style={({ pressed }) => [styles.chip, styles.headingChip, pressed && { opacity: 0.7 }]}
+            onPress={() => orientation.supported && setFollow(true)}
+            disabled={!orientation.supported || following}
+            accessibilityLabel={
+              orientation.supported && !following ? strings.home.followCompass : undefined
+            }
+          >
+            {orientation.supported && (
+              <Ionicons
+                name={following ? 'compass' : 'compass-outline'}
+                size={16}
+                color={following ? colors.accent : colors.muted}
+              />
+            )}
+            <Text style={styles.chipText}>
+              {Math.round(centerDeg) % 360}° {COMPASS[Math.round(centerDeg / 45) % 8]}
+            </Text>
+          </Pressable>
+        ) : null}
+      </View>
+
+      {/* bottom bar */}
+      <View
+        style={[
+          styles.bottomBar,
+          { paddingBottom: insets.bottom, height: BOTTOM_BAR + insets.bottom },
+        ]}
+      >
+        <BarButton
+          icon="map-outline"
+          label={strings.home.places}
+          onPress={() => router.push('/viewpoints')}
+        />
+        <BarButton icon="list" label={strings.home.peaks} onPress={() => router.push('/peaks')} />
+        <BarButton
+          icon="information-circle-outline"
+          label={strings.home.info}
+          onPress={() => router.push('/about')}
+        />
+      </View>
+    </View>
   );
 }
+
+function chipLabel(
+  location: ReturnType<typeof useLocationStore.getState>,
+  sceneLabel: string | null,
+): string {
+  if (location.source === 'simulated' && location.viewpoint) return location.viewpoint.name;
+  if (location.gpsStatus === 'fixed' && location.fix) {
+    return strings.location.chipGps(Math.round(location.fix.accuracyM ?? 0));
+  }
+  if (location.gpsStatus === 'searching' || location.gpsStatus === 'requesting') {
+    return strings.location.chipSearching;
+  }
+  return sceneLabel ?? strings.location.pickViewpoint;
+}
+
+/** What to show while there is no scene yet. */
+function NoScene() {
+  const { source, gpsStatus, searchStartedAt, startGps, gpsError } = useLocationStore();
+  const sceneStatus = useSceneStore((s) => s.status);
+  const [nowMs, setNowMs] = useState<number | null>(null);
+  useEffect(() => {
+    if (gpsStatus !== 'searching') return;
+    const tick = () => setNowMs(Date.now());
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [gpsStatus]);
+
+  const L = strings.location;
+  const pick = () => router.push('/viewpoints');
+
+  if (sceneStatus === 'computing' || (source === 'simulated' && sceneStatus !== 'outside')) {
+    return <EmptyState icon="hourglass-outline" busy title={strings.home.computing} />;
+  }
+  if (sceneStatus === 'outside') {
+    return (
+      <EmptyState icon="map-outline" title={L.outsideTitle} text={L.outsideText}>
+        <Button label={L.pickViewpoint} icon="location" onPress={pick} />
+      </EmptyState>
+    );
+  }
+  if (gpsStatus === 'searching') {
+    const secs = searchStartedAt && nowMs ? Math.round((nowMs - searchStartedAt) / 1000) : 0;
+    return (
+      <EmptyState icon="navigate" busy title={L.searchingTitle} text={L.searchingText(secs)}>
+        <Button label={L.pickInstead} icon="location" variant="secondary" onPress={pick} />
+      </EmptyState>
+    );
+  }
+  const problem: Partial<Record<string, { icon: IconName; title: string; text: string }>> = {
+    denied: { icon: 'location-outline', title: L.deniedTitle, text: L.deniedText },
+    'services-off': {
+      icon: 'location-outline',
+      title: L.servicesOffTitle,
+      text: L.servicesOffText,
+    },
+    error: { icon: 'warning-outline', title: L.errorTitle, text: gpsError ?? '' },
+  };
+  const p = problem[gpsStatus];
+  if (p) {
+    return (
+      <EmptyState icon={p.icon} title={p.title} text={p.text}>
+        <Button label={L.pickViewpoint} icon="location" onPress={pick} />
+        <Button label={strings.retry} variant="secondary" onPress={() => startGps()} />
+      </EmptyState>
+    );
+  }
+  return (
+    <EmptyState
+      icon="navigate"
+      busy={gpsStatus === 'requesting'}
+      title={L.whereTitle}
+      text={L.whereText}
+    >
+      <Button label={L.useMyLocation} icon="navigate" onPress={() => startGps()} />
+      <Button label={L.pickViewpoint} icon="location" variant="secondary" onPress={pick} />
+    </EmptyState>
+  );
+}
+
+function BarButton({
+  icon,
+  label,
+  onPress,
+}: {
+  icon: IconName;
+  label: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.barButton, pressed && { opacity: 0.6 }]}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+    >
+      <Ionicons name={icon} size={24} color={colors.text} />
+      <Text style={styles.barLabel}>{label}</Text>
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: colors.bg },
+  emptyArea: { justifyContent: 'center' },
+  topBar: {
+    position: 'absolute',
+    left: space.md,
+    right: space.md,
+    height: TOP_BAR - space.sm * 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: space.sm,
+  },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    height: 40,
+    paddingHorizontal: 14,
+    borderRadius: radius.pill,
+    backgroundColor: 'rgba(11,18,32,0.82)',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+    flexShrink: 1,
+  },
+  headingChip: { flexShrink: 0 },
+  chipText: { color: colors.text, fontSize: 15, fontWeight: '600', flexShrink: 1 },
+  bottomBar: {
+    flexDirection: 'row',
+    backgroundColor: colors.bg,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
+  },
+  barButton: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 2 },
+  barLabel: { color: colors.muted, fontSize: 11, fontWeight: '600' },
+});

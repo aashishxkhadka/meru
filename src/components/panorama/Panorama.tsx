@@ -1,6 +1,6 @@
 /**
- * Panorama mode view (SPEC 3.4): Skia terrain + decluttered, tappable peak labels.
- * Labels are plain React Native views so they render (and tap) identically on web and native.
+ * Panorama view (SPEC 3.4): Skia terrain + decluttered, tappable peak labels.
+ * Labels are React Native views so they render (and tap) identically on web and native.
  */
 import { useMemo, useRef } from 'react';
 import { type GestureResponderEvent, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -10,9 +10,8 @@ import { declutterLabels } from '../../core/declutter';
 import type { PackScene } from '../../store/sceneStore';
 import { colors } from '../theme';
 import {
-  AXIS_HEIGHT,
   H_FOV_DEG,
-  LABEL_AREA,
+  LABEL_ROWS,
   LABEL_ROW_HEIGHT,
   makeLayout,
   xOfAzimuth,
@@ -30,27 +29,39 @@ const COMPASS: Record<number, string> = {
   270: 'W',
   315: 'NW',
 };
-/** Label width for placement: bold 13 pt names are wider than 12 pt ones; + padding. */
-const estimateWidth = (name: string, sub: string, main: boolean) =>
-  Math.ceil(Math.max(name.length * (main ? 8.4 : 7.4), sub.length * 6.6) + 16);
+
 const subtitle = (elevationM: number, distanceM: number) =>
   `${elevationM.toLocaleString('en-US')} m · ${(distanceM / 1000).toFixed(distanceM < 10_000 ? 1 : 0)} km`;
+/** Width of a label pill for placement (bold 12.5 pt names, 10.5 pt subtitle, padding). */
+const labelWidth = (name: string, sub: string, main: boolean) =>
+  Math.ceil(Math.max(name.length * (main ? 8.1 : 7.3), sub.length * 6.1) + 16);
 
 interface Props {
   scene: PackScene;
   width: number;
   height: number;
   centerDeg: number;
-  /** Called while dragging with the new centre azimuth. */
+  /** Space kept free at the top for overlays. */
+  topInset?: number;
   onDrag: (centerDeg: number) => void;
   onPeakPress: (peakId: string) => void;
 }
 
-export function Panorama({ scene, width, height, centerDeg, onDrag, onPeakPress }: Props) {
-  const layout = useMemo(() => makeLayout(scene.horizon, width, height), [scene, width, height]);
+export function Panorama({
+  scene,
+  width,
+  height,
+  centerDeg,
+  topInset = 0,
+  onDrag,
+  onPeakPress,
+}: Props) {
+  const layout = useMemo(
+    () => makeLayout(scene.horizon, width, height, topInset),
+    [scene, width, height, topInset],
+  );
 
-  // Drag to rotate (responder props, so handlers always see current values).
-  // Movements under 5 px fall through to label taps.
+  // Drag to rotate. Movements under 5 px fall through to label taps.
   const drag = useRef({ startX: 0, startDeg: 0 });
   const responder = {
     onTouchStart: (e: GestureResponderEvent) => {
@@ -71,24 +82,25 @@ export function Panorama({ scene, width, height, centerDeg, onDrag, onPeakPress 
   };
 
   const visible = scene.peaks.filter((r) => r.visible);
-  const candidates = visible.map((r) => ({
-    id: r.peak.id,
-    rank: r.peak.rank,
-    elevationM: r.peak.elevationM,
-    anchorX: xOfAzimuth(layout, centerDeg, r.azimuthDeg),
-    widthPx: estimateWidth(
-      r.peak.name,
-      subtitle(r.peak.elevationM, r.distanceM),
-      r.peak.rank === 1,
-    ),
-    compactWidthPx: estimateWidth(r.peak.name, '', r.peak.rank === 1),
-  }));
-  const placed = declutterLabels(candidates, { screenWidthPx: width, maxShiftPx: 160 });
+  const placed = declutterLabels(
+    visible.map((r) => ({
+      id: r.peak.id,
+      rank: r.peak.rank,
+      elevationM: r.peak.elevationM,
+      anchorX: xOfAzimuth(layout, centerDeg, r.azimuthDeg),
+      widthPx: labelWidth(r.peak.name, subtitle(r.peak.elevationM, r.distanceM), r.peak.rank === 1),
+      compactWidthPx: labelWidth(r.peak.name, '', r.peak.rank === 1),
+    })),
+    { screenWidthPx: width, maxShiftPx: 140, gapPx: 4, rowCount: LABEL_ROWS },
+  );
   const byId = new Map(visible.map((r) => [r.peak.id, r]));
 
   const ticks: { x: number; az: number }[] = [];
-  const first = Math.ceil((centerDeg - H_FOV_DEG / 2) / 5) * 5;
-  for (let az = first; az <= centerDeg + H_FOV_DEG / 2; az += 5) {
+  for (
+    let az = Math.ceil((centerDeg - H_FOV_DEG / 2) / 5) * 5;
+    az <= centerDeg + H_FOV_DEG / 2;
+    az += 5
+  ) {
     ticks.push({ x: xOfAzimuth(layout, centerDeg, az), az: wrapTo360(az) });
   }
 
@@ -96,13 +108,12 @@ export function Panorama({ scene, width, height, centerDeg, onDrag, onPeakPress 
     <View style={{ width, height }} {...responder}>
       <Terrain horizon={scene.horizon} layout={layout} centerDeg={centerDeg} />
 
-      {/* compass axis */}
       {ticks.map(({ x, az }) => (
         <View
           key={`t${az}`}
           style={[
             styles.tick,
-            { left: x, top: layout.terrainBottom, height: az % 45 === 0 ? 10 : 5 },
+            { left: x, top: layout.terrainBottom, height: az % 45 === 0 ? 8 : 4 },
           ]}
         />
       ))}
@@ -111,55 +122,58 @@ export function Panorama({ scene, width, height, centerDeg, onDrag, onPeakPress 
         .map(({ x, az }) => (
           <Text
             key={`l${az}`}
+            numberOfLines={1}
             style={[
               styles.tickText,
-              { left: x - 20, top: layout.terrainBottom + 11 },
+              { left: x - 20, top: layout.terrainBottom + 9 },
               az % 45 === 0 && styles.tickTextMajor,
             ]}
-            numberOfLines={1}
           >
             {COMPASS[az] ?? `${az}°`}
           </Text>
         ))}
 
-      {/* labels: leader line from label to summit, dot on the summit */}
       {placed.map((p) => {
         const r = byId.get(p.id)!;
         const summitY = yOfAngle(layout, r.elevationAngleDeg);
-        const labelTop = LABEL_AREA - (p.row + 1) * LABEL_ROW_HEIGHT;
+        const labelTop = layout.labelBottom - (p.row + 1) * LABEL_ROW_HEIGHT;
         const lineTop = labelTop + LABEL_ROW_HEIGHT - 4;
-        // Shifted labels: the leader drops from inside the label box (nearest the summit),
-        // then runs straight down to the summit.
         const lineX = Math.min(Math.max(p.anchorX, p.left + 6), p.right - 6);
+        const main = r.peak.rank === 1;
         return (
           <View key={p.id} pointerEvents="box-none" style={StyleSheet.absoluteFill}>
             {lineX !== p.anchorX && (
               <View
                 style={[
-                  styles.connector,
+                  styles.line,
                   {
                     left: Math.min(lineX, p.anchorX),
                     top: lineTop,
                     width: Math.abs(p.anchorX - lineX),
+                    height: 1,
                   },
                 ]}
               />
             )}
             <View
               style={[
-                styles.leader,
-                { left: p.anchorX, top: lineTop, height: Math.max(0, summitY - lineTop) },
+                styles.line,
+                { left: p.anchorX, top: lineTop, width: 1, height: Math.max(0, summitY - lineTop) },
               ]}
             />
             <View style={[styles.dot, { left: p.anchorX - 3, top: summitY - 3 }]} />
             <Pressable
               onPress={() => onPeakPress(p.id)}
               hitSlop={4}
-              style={[styles.label, { left: p.left, top: labelTop, width: p.right - p.left }]}
+              style={({ pressed }) => [
+                styles.label,
+                { left: p.left, top: labelTop, width: p.right - p.left },
+                pressed && { opacity: 0.7 },
+              ]}
               accessibilityRole="button"
               accessibilityLabel={`${r.peak.name}, ${subtitle(r.peak.elevationM, r.distanceM)}`}
             >
-              <Text style={[styles.name, r.peak.rank === 1 && styles.nameMain]} numberOfLines={1}>
+              <Text style={[styles.name, main && styles.nameMain]} numberOfLines={1}>
                 {r.peak.name}
               </Text>
               {!p.compact && (
@@ -176,37 +190,34 @@ export function Panorama({ scene, width, height, centerDeg, onDrag, onPeakPress 
 }
 
 const styles = StyleSheet.create({
-  tick: { position: 'absolute', width: 1, backgroundColor: colors.muted },
+  tick: { position: 'absolute', width: 1, backgroundColor: colors.faint },
   tickText: {
     position: 'absolute',
-    top: 10,
-    left: -20,
     width: 40,
     textAlign: 'center',
     color: colors.muted,
     fontSize: 11,
   },
   tickTextMajor: { color: colors.text, fontWeight: '700', fontSize: 12 },
-  leader: { position: 'absolute', width: 1, backgroundColor: 'rgba(255,255,255,0.75)' },
-  connector: { position: 'absolute', height: 1, backgroundColor: 'rgba(255,255,255,0.75)' },
+  line: { position: 'absolute', backgroundColor: 'rgba(255,255,255,0.7)' },
   dot: {
     position: 'absolute',
     width: 6,
     height: 6,
     borderRadius: 3,
     backgroundColor: colors.accent,
+    borderWidth: 1,
+    borderColor: '#fff',
   },
   label: {
     position: 'absolute',
-    height: LABEL_ROW_HEIGHT - 4,
-    paddingHorizontal: 6,
+    height: LABEL_ROW_HEIGHT - 6,
+    paddingHorizontal: 7,
     justifyContent: 'center',
-    borderRadius: 6,
-    backgroundColor: 'rgba(11,18,32,0.72)',
+    borderRadius: 7,
+    backgroundColor: 'rgba(11,18,32,0.78)',
   },
   name: { color: colors.text, fontSize: 12, fontWeight: '600' },
-  nameMain: { fontWeight: '800', fontSize: 13 },
-  sub: { color: colors.muted, fontSize: 11 },
+  nameMain: { fontWeight: '800', fontSize: 12.5 },
+  sub: { color: '#c3cfdf', fontSize: 10.5 },
 });
-
-export { AXIS_HEIGHT };

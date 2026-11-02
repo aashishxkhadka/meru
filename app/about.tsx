@@ -1,30 +1,52 @@
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
-import { Text } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { Row, Screen, screenStyles } from '../src/components/Screen';
+import { ScreenLayout } from '../src/components/ScreenLayout';
+import { colors, space } from '../src/components/theme';
+import { Card, KeyValue, SectionTitle, text } from '../src/components/ui';
 import { usePack } from '../src/store/packStore';
 import { strings } from '../src/strings';
 
 /** About (SPEC 3.8): version, data attribution (required by the data licences), feedback. */
 export default function AboutScreen() {
   const { manifest } = usePack();
+  const A = strings.about;
   return (
-    <Screen title={strings.appName} onLongPressTitle={() => router.push('/debug')}>
-      <Text style={screenStyles.muted}>{strings.tagline}</Text>
-      <Row label={strings.about.version} value={Constants.expoConfig?.version ?? '?'} />
-      <Row label={strings.debug.pack} value={`${manifest.name} v${manifest.version}`} />
-      <Text style={screenStyles.section}>{strings.about.dataSources}</Text>
-      {manifest.attribution.map((line) => (
-        <Text key={line} style={screenStyles.muted}>
-          {line}
-        </Text>
-      ))}
-      <Text style={screenStyles.section}>{strings.about.feedback}</Text>
-      <Text style={screenStyles.muted}>{strings.about.feedbackText}</Text>
-      <Text style={[screenStyles.muted, { marginTop: 24, opacity: 0.5 }]}>
-        {strings.about.debugHint}
-      </Text>
-    </Screen>
+    <ScreenLayout title={A.title}>
+      <Pressable onLongPress={() => router.push('/debug')} delayLongPress={600} style={styles.hero}>
+        <Text style={styles.appName}>{strings.appName}</Text>
+        <Text style={text.muted}>{strings.tagline}</Text>
+      </Pressable>
+
+      <Card>
+        <KeyValue label={A.version} value={Constants.expoConfig?.version ?? '?'} />
+        <KeyValue label={A.dataPack} value={`${manifest.name} · v${manifest.version}`} last />
+      </Card>
+
+      <SectionTitle>{A.dataSources}</SectionTitle>
+      <Card style={styles.padded}>
+        {manifest.attribution.map((line, i) => (
+          <Text key={line} style={[text.small, i > 0 && { marginTop: space.sm }]}>
+            {line}
+          </Text>
+        ))}
+      </Card>
+
+      <SectionTitle>{A.feedback}</SectionTitle>
+      <Card style={styles.padded}>
+        <Text style={text.muted}>{A.feedbackText}</Text>
+      </Card>
+
+      <View style={{ marginTop: space.xl }}>
+        <Text style={[text.small, { textAlign: 'center' }]}>{A.debugHint}</Text>
+      </View>
+    </ScreenLayout>
   );
 }
+
+const styles = StyleSheet.create({
+  hero: { alignItems: 'center', paddingVertical: space.xl, gap: space.xs },
+  appName: { color: colors.text, fontSize: 40, fontWeight: '800', letterSpacing: 1 },
+  padded: { padding: space.lg },
+});

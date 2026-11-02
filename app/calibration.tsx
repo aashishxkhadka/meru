@@ -1,11 +1,13 @@
-import { Placeholder, Screen } from '../src/components/Screen';
+import { ComingSoon } from '../src/components/ComingSoon';
 import { strings } from '../src/strings';
 
 /** Calibration (SPEC 3.3). Built in step 9. */
 export default function CalibrationScreen() {
   return (
-    <Screen title={strings.calibration.title}>
-      <Placeholder step={9} />
-    </Screen>
+    <ComingSoon
+      title={strings.calibration.title}
+      icon="compass-outline"
+      text={strings.calibration.text}
+    />
   );
 }
