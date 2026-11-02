@@ -9,6 +9,7 @@ import { join } from 'node:path';
 
 import { observerElevationM } from '../src/core/dem';
 import { computeHorizon, horizonAngleAt } from '../src/core/horizon';
+import { computeScene } from '../src/core/scene';
 import { computeVisiblePeaks } from '../src/core/visibility';
 import { loadPackFromDisk } from '../scripts/loadPack';
 
@@ -106,5 +107,16 @@ describe('snapshots', () => {
 
   it('Pokhara Lakeside', () => {
     expect(summary('pokhara-lakeside')).toMatchSnapshot();
+  });
+});
+
+describe('chunked scene (what the app runs)', () => {
+  it('Sarangkot scene equals the verified Node result', async () => {
+    const vp = viewpoints.find((v) => v.id === 'sarangkot')!;
+    const scene = await computeScene(pack.dem, vp, peaks, { eyeHeightM: vp.eyeHeightM });
+    const direct = computeVisiblePeaks(pack.dem, observerAt('sarangkot'), peaks);
+    expect(scene.peaks.filter((r) => r.visible).map((r) => r.peak.id)).toEqual(
+      direct.filter((r) => r.visible).map((r) => r.peak.id),
+    );
   });
 });

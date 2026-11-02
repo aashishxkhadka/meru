@@ -6,6 +6,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 
 import { colors } from '../src/components/theme';
 import { usePackStore } from '../src/store/packStore';
+import { useSceneSync } from '../src/store/useSceneSync';
 import { strings } from '../src/strings';
 
 // Keep the native splash up until the data pack is in memory.
@@ -47,6 +48,7 @@ export default function RootLayout() {
 
   return (
     <>
+      <SceneSync />
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}>
         <Stack.Screen name="index" />
         <Stack.Screen
@@ -79,3 +81,9 @@ const styles = StyleSheet.create({
   retry: { color: colors.accent, fontSize: 16, fontWeight: '600', padding: 12 },
   loading: { color: colors.muted, fontSize: 15 },
 });
+
+/** Mounted only once the pack is ready (usePack() requires it). */
+function SceneSync() {
+  useSceneSync();
+  return null;
+}

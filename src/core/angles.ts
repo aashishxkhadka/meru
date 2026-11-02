@@ -20,3 +20,14 @@ export function wrapTo360(angleDeg: number): number {
 export function wrapTo180(angleDeg: number): number {
   return wrapTo360(angleDeg + 180) - 180;
 }
+
+/** Mean direction of a set of angles (handles the 359°/1° wrap). 0 for an empty list. */
+export function circularMeanDeg(anglesDeg: readonly number[]): number {
+  let sin = 0;
+  let cos = 0;
+  for (const a of anglesDeg) {
+    sin += Math.sin(toRadians(a));
+    cos += Math.cos(toRadians(a));
+  }
+  return anglesDeg.length === 0 ? 0 : wrapTo360(toDegrees(Math.atan2(sin, cos)));
+}
