@@ -1,0 +1,10 @@
+node_modules
+dist
+.expo
+android
+ios
+tools/pipeline/cache
+assets/packs
+CLAUDE.md
+README.md
+docs
