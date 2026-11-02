@@ -15,6 +15,21 @@ export const strings = {
     computing: 'Working out the view…',
     followCompass: 'Follow compass',
   },
+  camera: {
+    permissionTitle: 'Camera access needed',
+    permissionText:
+      'Meru shows peak names on top of your camera view. Nothing is recorded or uploaded.',
+    allowCamera: 'Allow camera',
+    noCamera: 'No back camera found on this device.',
+    waitingForSensors: 'Waiting for compass…',
+    pointUp: 'Point your phone at the mountains',
+    calibrateCompass:
+      'Compass needs calibrating: move your phone in a figure-8 a few times, away from metal.',
+    paused: 'Camera paused to save battery. Tap to continue.',
+    modeCamera: 'Camera',
+    modePanorama: 'Panorama',
+    calibrate: 'Calibrate',
+  },
   location: {
     chipSearching: 'Finding location…',
     chipGps: (accuracyM: number) => `My location · ±${accuracyM} m`,

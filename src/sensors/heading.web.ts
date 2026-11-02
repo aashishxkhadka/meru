@@ -1,4 +1,4 @@
-/** Web: no compass. Panorama falls back to drag-only. */
+/** Web: no compass. */
 import type { HeadingSample } from './heading';
 
 export type { HeadingSample };

@@ -1,10 +1,11 @@
 /** Shared panorama geometry (no Skia imports, safe to load before CanvasKit on web). */
 import { wrapTo360 } from '../../core/angles';
 import type { Horizon } from '../../core/horizon';
+import { LABEL_ROW_HEIGHT } from '../labels/PeakLabels';
 
 /** Visible width of the panorama; same as the default portrait camera FOV (SPEC 6.5). */
 export const H_FOV_DEG = 50;
-export const LABEL_ROW_HEIGHT = 34;
+export { LABEL_ROW_HEIGHT } from '../labels/PeakLabels';
 /** Panorama has room for a 4th row; the camera overlay keeps SPEC 6.6's 3. */
 export const LABEL_ROWS = 4;
 export const AXIS_HEIGHT = 28;

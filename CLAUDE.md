@@ -107,7 +107,9 @@ Notes:
 - Expo SDK 58, React Native 0.88, TypeScript 6, expo-router (routes live in `app/`). Typed routes are off (they depend on a file only the dev server generates).
 - react-native-vision-camera is v5 (Nitro): needs react-native-nitro-modules + react-native-nitro-image and has NO config plugin; camera permission is set in app.json (`ios.infoPlist`, `android.permissions`). Microphone is blocked.
 - dem.bin is bundled via Metro (`metro.config.js` adds `bin` to assetExts) and loaded by `src/data/loadBundledPack.ts`; packs are registered in `src/data/bundledPacks.ts`.
-- Storage: AsyncStorage (not MMKV). UI strings: `src/strings.ts`.
+- Storage: AsyncStorage (not MMKV). UI strings: `src/strings.ts`. Shared UI kit: `src/components/ui.tsx`.
+- Camera pose (step 8), verified from expo-sensors native source: `DeviceMotion.accelerationIncludingGravity` points DOWN in device axes on both platforms (face-up ⇒ z ≈ −9.81); `Magnetometer` is the calibrated field on both. Device axes: x right, y top, z towards the user; back camera = −z. Pitch/roll come from gravity and heading from a tilt-compensated compass in `src/core/orientation.ts` — do NOT use DeviceMotion `rotation` Euler angles (platform conventions differ and they gimbal-lock when the phone is upright) or expo-location heading for the camera direction (it tracks the phone's top edge). expo-location heading is used only for accuracy (figure-8 prompt) and declination.
+- Camera FOV: VisionCamera v5 has no FOV field; `focalLength` is 35 mm-equivalent → `sensorFovFromFocalLength35mm`, then `visibleFovForCover` because the full-screen preview crops the sides (~34° visible on a tall phone, not 50°).
 - Jest uses `tsconfig.jest.json`; tests import `describe/it/expect` from `@jest/globals` (TS 6 does not pick up Jest globals automatically).
 - Node-only files (`scripts/`, real-data tests in `tests/`) start with `/// <reference types="node" />`; Node types are not loaded for the app.
 - `tests/dem.real.test.ts` checks `src/core/dem.ts` against the Python reader on the real pack (1,008 reference points).

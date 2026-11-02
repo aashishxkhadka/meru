@@ -12,6 +12,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { circularMeanDeg } from '../src/core/angles';
+import { CameraLive, cameraSupported } from '../src/components/camera/CameraLive';
 import { Panorama } from '../src/components/panorama/Panorama';
 import { colors, radius, space } from '../src/components/theme';
 import { Button, EmptyState, type IconName } from '../src/components/ui';
@@ -25,8 +26,8 @@ const BOTTOM_BAR = 64;
 const COMPASS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
 
 /**
- * Home (SPEC 3.2 layout). Until the camera arrives in step 8, the live view is the drawn
- * panorama: location chip + heading on top, Places / Peaks / Info at the bottom.
+ * Home (SPEC 3.2): live camera with peak labels on phones (drawn panorama on web, or when
+ * toggled). Location chip + heading on top; Places / Peaks / mode / Calibrate / Info below.
  */
 export default function Home() {
   const insets = useSafeAreaInsets();
@@ -36,6 +37,7 @@ export default function Home() {
   const orientation = useOrientationStore();
   const [follow, setFollow] = useState(orientation.supported);
   const [manualDeg, setManualDeg] = useState<number | null>(null);
+  const [mode, setMode] = useState<'camera' | 'panorama'>(cameraSupported ? 'camera' : 'panorama');
 
   // Start GPS on first open (onboarding will ask first, step 11).
   const { source, gpsStatus, startGps } = location;
@@ -52,13 +54,22 @@ export default function Home() {
   const mainPeaks =
     scene?.peaks.filter((r) => r.visible && r.peak.rank === 1).map((r) => r.azimuthDeg) ?? [];
   const defaultDeg = mainPeaks.length ? circularMeanDeg(mainPeaks) : 0;
-  const following = follow && orientation.headingDeg !== null;
+  const inCamera = mode === 'camera';
+  const following = (inCamera || follow) && orientation.headingDeg !== null;
   const centerDeg = following ? orientation.headingDeg! : (manualDeg ?? defaultDeg);
   const panoHeight = height - insets.bottom - BOTTOM_BAR;
 
   return (
     <View style={styles.root}>
-      {scene ? (
+      {scene && inCamera ? (
+        <CameraLive
+          scene={scene}
+          width={width}
+          height={panoHeight}
+          topInset={insets.top + TOP_BAR}
+          onPeakPress={(id) => router.push({ pathname: '/peak/[id]', params: { id } })}
+        />
+      ) : scene ? (
         <Panorama
           scene={scene}
           width={width}
@@ -102,7 +113,7 @@ export default function Home() {
           <Pressable
             style={({ pressed }) => [styles.chip, styles.headingChip, pressed && { opacity: 0.7 }]}
             onPress={() => orientation.supported && setFollow(true)}
-            disabled={!orientation.supported || following}
+            disabled={!orientation.supported || following || inCamera}
             accessibilityLabel={
               orientation.supported && !following ? strings.home.followCompass : undefined
             }
@@ -134,6 +145,18 @@ export default function Home() {
           onPress={() => router.push('/viewpoints')}
         />
         <BarButton icon="list" label={strings.home.peaks} onPress={() => router.push('/peaks')} />
+        {cameraSupported ? (
+          <BarButton
+            icon={inCamera ? 'image-outline' : 'camera-outline'}
+            label={inCamera ? strings.camera.modePanorama : strings.camera.modeCamera}
+            onPress={() => setMode(inCamera ? 'panorama' : 'camera')}
+          />
+        ) : null}
+        <BarButton
+          icon="compass-outline"
+          label={strings.camera.calibrate}
+          onPress={() => router.push('/calibration')}
+        />
         <BarButton
           icon="information-circle-outline"
           label={strings.home.info}
