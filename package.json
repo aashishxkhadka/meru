@@ -13,7 +13,8 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "elev": "tsx scripts/elev.ts"
+    "elev": "tsx scripts/elev.ts",
+    "panorama": "tsx scripts/panorama.ts"
   },
   "dependencies": {
     "expo": "~58.0.22",
@@ -30,6 +31,7 @@
   },
   "devDependencies": {
     "@jest/globals": "^30.5.2",
+    "@napi-rs/canvas": "^1.1.0",
     "@types/jest": "30.0.0",
     "@types/node": "^26.6.6",
     "@types/react": "~19.3.0",

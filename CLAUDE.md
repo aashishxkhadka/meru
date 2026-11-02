@@ -82,6 +82,7 @@ npm run typecheck          # tsc --noEmit
 npm run lint               # ESLint (eslint-config-expo + prettier; src/core purity rules)
 npm run format             # Prettier write (format:check to verify)
 npm run elev -- 28.24625 83.94881   # elevation at lat lon from the real pack via src/core/dem.ts (tsx)
+npm run panorama -- sarangkot world-peace-pagoda pokhara-lakeside   # PNGs + peak table + timings -> tools/out/
 
 # From step 5 (development build, native modules):
 npx expo prebuild
@@ -105,6 +106,7 @@ Notes:
 - Jest uses `tsconfig.jest.json`; tests import `describe/it/expect` from `@jest/globals` (TS 6 does not pick up Jest globals automatically).
 - Node-only files (`scripts/`, real-data tests in `tests/`) start with `/// <reference types="node" />`; Node types are not loaded for the app.
 - `tests/dem.real.test.ts` checks `src/core/dem.ts` against the Python reader on the real pack (1,008 reference points).
+- `tests/__snapshots__/visibility.real.test.ts.snap` holds the visible/hidden peaks from Sarangkot (verified against a real photo, 2026-11-02) and Lakeside. Never update it with `jest -u` without the user re-checking the panorama and approving.
 
 ## Things to watch out for
 
