@@ -84,10 +84,12 @@ npm run format             # Prettier write (format:check to verify)
 npm run elev -- 28.24625 83.94881   # elevation at lat lon from the real pack via src/core/dem.ts (tsx)
 npm run panorama -- sarangkot world-peace-pagoda pokhara-lakeside   # PNGs + peak table + timings -> tools/out/
 
-# From step 5 (development build, native modules):
-npx expo prebuild
-npm run android            # npx expo run:android
-npm run ios                # npx expo run:ios
+# Development build (native modules; not Expo Go). android/ and ios/ are generated, git-ignored:
+npx expo prebuild --clean          # regenerate native projects after app.json/plugin changes
+npm run android                    # npx expo run:android  (debug, JS from Metro over USB/Wi-Fi)
+npx expo run:android --variant release   # JS embedded in the APK: use this for airplane-mode tests
+npm run ios                        # npx expo run:ios (needs full Xcode)
+npx expo export --platform android # bundle-only check, no SDK needed (verifies dem.bin is packaged)
 
 # Data pipeline (Python 3.11+, venv in tools/pipeline/.venv, git-ignored):
 python3 -m venv tools/pipeline/.venv && tools/pipeline/.venv/bin/pip install -r tools/pipeline/requirements.txt
@@ -102,7 +104,10 @@ tools/pipeline/.venv/bin/python tools/pipeline/elev.py 28.2442 83.9486          
 ```
 
 Notes:
-- Expo SDK 58, React Native 0.88, TypeScript 6, expo-router (routes live in `app/`).
+- Expo SDK 58, React Native 0.88, TypeScript 6, expo-router (routes live in `app/`). Typed routes are off (they depend on a file only the dev server generates).
+- react-native-vision-camera is v5 (Nitro): needs react-native-nitro-modules + react-native-nitro-image and has NO config plugin; camera permission is set in app.json (`ios.infoPlist`, `android.permissions`). Microphone is blocked.
+- dem.bin is bundled via Metro (`metro.config.js` adds `bin` to assetExts) and loaded by `src/data/loadBundledPack.ts`; packs are registered in `src/data/bundledPacks.ts`.
+- Storage: AsyncStorage (not MMKV). UI strings: `src/strings.ts`.
 - Jest uses `tsconfig.jest.json`; tests import `describe/it/expect` from `@jest/globals` (TS 6 does not pick up Jest globals automatically).
 - Node-only files (`scripts/`, real-data tests in `tests/`) start with `/// <reference types="node" />`; Node types are not loaded for the app.
 - `tests/dem.real.test.ts` checks `src/core/dem.ts` against the Python reader on the real pack (1,008 reference points).

@@ -17,17 +17,31 @@
     "panorama": "tsx scripts/panorama.ts"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@shopify/react-native-skia": "2.14.0",
     "expo": "~58.0.22",
+    "expo-asset": "~58.0.19",
     "expo-constants": "~58.0.14",
+    "expo-dev-client": "~58.0.18",
+    "expo-file-system": "~58.0.13",
     "expo-linking": "~58.0.15",
+    "expo-location": "~58.0.20",
+    "expo-media-library": "~58.0.13",
     "expo-router": "~58.0.29",
+    "expo-sensors": "~58.0.4",
+    "expo-splash-screen": "~58.0.12",
     "expo-status-bar": "~58.0.4",
+    "expo-system-ui": "~58.0.7",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-native": "0.88.1",
+    "react-native-nitro-image": "^0.15.2",
+    "react-native-nitro-modules": "^0.37.1",
     "react-native-safe-area-context": "~5.10.1",
     "react-native-screens": "~4.30.1",
-    "react-native-web": "^0.21.4"
+    "react-native-vision-camera": "^5.2.4",
+    "react-native-web": "^0.21.4",
+    "zustand": "^5.0.16"
   },
   "devDependencies": {
     "@jest/globals": "^30.5.2",
