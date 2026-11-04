@@ -48,12 +48,15 @@ export function PeakLabels({
   placed,
   labelBottom,
   onPress,
+  highlightId = null,
 }: {
   items: LabelItem[];
   placed: PlacedLabel[];
   /** Bottom edge of label row 0. */
   labelBottom: number;
   onPress: (id: string) => void;
+  /** Label drawn with an accent outline (e.g. the peak picked during calibration). */
+  highlightId?: string | null;
 }) {
   const byId = new Map(items.map((it) => [it.id, it]));
   return (
@@ -92,6 +95,7 @@ export function PeakLabels({
               style={({ pressed }) => [
                 styles.label,
                 { left: p.left, top: labelTop, width: p.right - p.left },
+                p.id === highlightId && styles.labelHighlight,
                 pressed && { opacity: 0.7 },
               ]}
               accessibilityRole="button"
@@ -132,6 +136,7 @@ const styles = StyleSheet.create({
     borderRadius: 7,
     backgroundColor: 'rgba(11,18,32,0.78)',
   },
+  labelHighlight: { borderWidth: 2, borderColor: colors.accent },
   name: { color: colors.text, fontSize: 12, fontWeight: '600' },
   nameMain: { fontWeight: '800', fontSize: 12.5 },
   sub: { color: '#c3cfdf', fontSize: 10.5 },

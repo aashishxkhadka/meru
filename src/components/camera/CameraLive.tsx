@@ -3,29 +3,26 @@
  * Per frame only projection runs; horizon and visibility come precomputed from SceneStore.
  */
 import { Ionicons } from '@expo/vector-icons';
-import { Canvas, Path, Skia } from '@shopify/react-native-skia';
-import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { type ReactNode, memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Camera, useCameraDevice, useCameraPermission } from 'react-native-vision-camera';
 
+import { viewWithFovOverride } from '../../core/calibration';
 import {
+  type CalibrationOffsets,
   DEFAULT_SENSOR_FOV,
-  NO_CALIBRATION,
   type CameraPose,
   type CameraView,
-  projectToScreen,
   sensorFovFromFocalLength35mm,
   visibleFovForCover,
 } from '../../core/projection';
 import { useOrientationStore } from '../../store/orientationStore';
 import type { PackScene } from '../../store/sceneStore';
 import { strings } from '../../strings';
-import { LABEL_ROW_HEIGHT, type LabelItem, PeakLabels, placeLabels } from '../labels/PeakLabels';
 import { colors, radius, space } from '../theme';
 import { Button, EmptyState } from '../ui';
+import { CameraOverlay } from './CameraOverlay';
 
-/** SPEC 6.6: up to 3 label rows over the camera. */
-const LABEL_ROWS = 3;
 /** SPEC 11: pause the camera after 3 minutes without interaction. */
 const IDLE_PAUSE_MS = 3 * 60 * 1000;
 /** SPEC 3.2: phone pointed at the ground. */
@@ -40,9 +37,31 @@ interface Props {
   /** Space kept clear at the top (location bar). */
   topInset: number;
   onPeakPress: (id: string) => void;
+  /** Saved (or, while calibrating, draft) offsets applied to every projection. */
+  calibration: CalibrationOffsets;
+  /** Hand-set horizontal FOV (advanced calibration); null = from the lens. */
+  hFovOverrideDeg: number | null;
+  /** Peak to emphasise (calibration "tap a peak"). */
+  highlightPeakId?: string | null;
+  /** Extra layer above the overlay (calibration controls), given the live view and pose. */
+  renderExtra?: (ctx: {
+    view: CameraView;
+    pose: CameraPose | null;
+    autoHFovDeg: number;
+  }) => ReactNode;
 }
 
-export function CameraLive({ scene, width, height, topInset, onPeakPress }: Props) {
+export function CameraLive({
+  scene,
+  width,
+  height,
+  topInset,
+  onPeakPress,
+  calibration,
+  hFovOverrideDeg,
+  highlightPeakId = null,
+  renderExtra,
+}: Props) {
   const { hasPermission, requestPermission } = useCameraPermission();
   const device = useCameraDevice('back', { physicalDevices: ['wide-angle'] });
   const { headingDeg, pitchDeg, rollDeg, headingAccuracy, magneticDisturbed } =
@@ -74,10 +93,14 @@ export function CameraLive({ scene, width, height, topInset, onPeakPress }: Prop
 
   // Field of view actually visible on screen (preview fills the view, cropping the sides).
   const focalLengthMm = device?.focalLength;
-  const view: CameraView = useMemo(() => {
+  const autoView: CameraView = useMemo(() => {
     const sensor = focalLengthMm ? sensorFovFromFocalLength35mm(focalLengthMm) : DEFAULT_SENSOR_FOV;
     return { widthPx: width, heightPx: height, ...visibleFovForCover(sensor, width, height) };
   }, [focalLengthMm, width, height]);
+  const view = useMemo(
+    () => viewWithFovOverride(autoView, hFovOverrideDeg),
+    [autoView, hFovOverrideDeg],
+  );
 
   if (!hasPermission) {
     return (
@@ -114,14 +137,17 @@ export function CameraLive({ scene, width, height, topInset, onPeakPress }: Prop
     <View style={{ width, height }} onTouchStart={wake}>
       <Preview device={device} active={!paused} />
       {pose && !paused ? (
-        <Overlay
+        <CameraOverlay
           scene={scene}
           pose={pose}
           view={view}
           topInset={topInset}
           onPeakPress={onPeakPress}
+          calibration={calibration}
+          highlightPeakId={highlightPeakId}
         />
       ) : null}
+      {!paused && renderExtra ? renderExtra({ view, pose, autoHFovDeg: autoView.hFovDeg }) : null}
 
       {!pose && !paused ? (
         <Hint icon="compass-outline" text={strings.camera.waitingForSensors} />
@@ -163,71 +189,6 @@ const Preview = memo(function Preview({
     />
   );
 });
-
-function Overlay({
-  scene,
-  pose,
-  view,
-  topInset,
-  onPeakPress,
-}: {
-  scene: PackScene;
-  pose: CameraPose;
-  view: CameraView;
-  topInset: number;
-  onPeakPress: (id: string) => void;
-}) {
-  // Skyline: project every horizon ray in view; break the line where rays leave the screen.
-  const { path, topY } = useMemo(() => {
-    const b = Skia.PathBuilder.Make();
-    let drawing = false;
-    let top = view.heightPx;
-    for (const ray of scene.horizon.rays) {
-      const p = Number.isFinite(ray.maxAngleDeg)
-        ? projectToScreen(ray.azimuthDeg, ray.maxAngleDeg, pose, view, NO_CALIBRATION, 2)
-        : null;
-      if (!p) {
-        drawing = false;
-        continue;
-      }
-      if (drawing) b.lineTo(p.x, p.y);
-      else b.moveTo(p.x, p.y);
-      drawing = true;
-      if (p.x >= 0 && p.x <= view.widthPx) top = Math.min(top, p.y);
-    }
-    return { path: b.detach(), topY: top };
-  }, [scene, pose, view]);
-
-  const items: LabelItem[] = [];
-  for (const r of scene.peaks) {
-    if (!r.visible) continue;
-    const p = projectToScreen(r.azimuthDeg, r.elevationAngleDeg, pose, view, NO_CALIBRATION, 0);
-    if (!p || p.y < 0 || p.y > view.heightPx) continue;
-    items.push({
-      id: r.peak.id,
-      name: r.peak.name,
-      rank: r.peak.rank,
-      elevationM: r.peak.elevationM,
-      distanceM: r.distanceM,
-      x: p.x,
-      y: p.y,
-    });
-  }
-  const placed = placeLabels(items, view.widthPx, LABEL_ROWS);
-  // Labels ride just above the skyline, but never under the top bar or too low on screen.
-  const minBottom = topInset + LABEL_ROWS * LABEL_ROW_HEIGHT + 8;
-  const labelBottom = Math.min(Math.max(minBottom, topY - 10), view.heightPx * 0.7);
-
-  return (
-    <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
-      <Canvas style={StyleSheet.absoluteFill} pointerEvents="none">
-        <Path path={path} style="stroke" strokeWidth={4} color="rgba(0,0,0,0.25)" />
-        <Path path={path} style="stroke" strokeWidth={1.75} color="rgba(255,255,255,0.85)" />
-      </Canvas>
-      <PeakLabels items={items} placed={placed} labelBottom={labelBottom} onPress={onPeakPress} />
-    </View>
-  );
-}
 
 function Hint({
   icon,

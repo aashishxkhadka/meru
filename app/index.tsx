@@ -11,11 +11,13 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { circularMeanDeg } from '../src/core/angles';
+import { circularMeanDeg, wrapTo360 } from '../src/core/angles';
 import { CameraLive, cameraSupported } from '../src/components/camera/CameraLive';
+import { Calibrator, useCalibrationSession } from '../src/components/camera/Calibrator';
 import { Panorama } from '../src/components/panorama/Panorama';
 import { colors, radius, space } from '../src/components/theme';
 import { Button, EmptyState, type IconName } from '../src/components/ui';
+import { useCalibrationStore } from '../src/store/calibrationStore';
 import { useLocationStore } from '../src/store/locationStore';
 import { useOrientationStore } from '../src/store/orientationStore';
 import { useSceneStore } from '../src/store/sceneStore';
@@ -38,6 +40,8 @@ export default function Home() {
   const [follow, setFollow] = useState(orientation.supported);
   const [manualDeg, setManualDeg] = useState<number | null>(null);
   const [mode, setMode] = useState<'camera' | 'panorama'>(cameraSupported ? 'camera' : 'panorama');
+  const saved = useCalibrationStore();
+  const calib = useCalibrationSession();
 
   // Start GPS on first open (onboarding will ask first, step 11).
   const { source, gpsStatus, startGps } = location;
@@ -56,7 +60,12 @@ export default function Home() {
   const defaultDeg = mainPeaks.length ? circularMeanDeg(mainPeaks) : 0;
   const inCamera = mode === 'camera';
   const following = (inCamera || follow) && orientation.headingDeg !== null;
-  const centerDeg = following ? orientation.headingDeg! : (manualDeg ?? defaultDeg);
+  // The calibrated heading offset corrects the compass in both views.
+  const centerDeg = following
+    ? wrapTo360(orientation.headingDeg! + saved.offsets.headingOffsetDeg)
+    : (manualDeg ?? defaultDeg);
+  const calibrating = calib.active && inCamera;
+  const openPeak = (id: string) => router.push({ pathname: '/peak/[id]', params: { id } });
   const panoHeight = height - insets.bottom - BOTTOM_BAR;
 
   return (
@@ -67,7 +76,24 @@ export default function Home() {
           width={width}
           height={panoHeight}
           topInset={insets.top + TOP_BAR}
-          onPeakPress={(id) => router.push({ pathname: '/peak/[id]', params: { id } })}
+          onPeakPress={calibrating ? calib.pickPeak : openPeak}
+          calibration={calibrating ? calib.draft.offsets : saved.offsets}
+          hFovOverrideDeg={calibrating ? calib.draft.hFovOverrideDeg : saved.hFovOverrideDeg}
+          highlightPeakId={calibrating ? calib.pickedPeakId : null}
+          renderExtra={
+            calibrating
+              ? ({ view, pose, autoHFovDeg }) => (
+                  <Calibrator
+                    session={calib}
+                    scene={scene}
+                    view={view}
+                    pose={pose}
+                    autoHFovDeg={autoHFovDeg}
+                    topInset={insets.top}
+                  />
+                )
+              : undefined
+          }
         />
       ) : scene ? (
         <Panorama
@@ -80,7 +106,7 @@ export default function Home() {
             setFollow(false);
             setManualDeg(deg);
           }}
-          onPeakPress={(id) => router.push({ pathname: '/peak/[id]', params: { id } })}
+          onPeakPress={openPeak}
         />
       ) : (
         <View style={[styles.emptyArea, { height: panoHeight, paddingTop: insets.top + TOP_BAR }]}>
@@ -88,8 +114,11 @@ export default function Home() {
         </View>
       )}
 
-      {/* top bar */}
-      <View style={[styles.topBar, { top: insets.top + space.sm }]} pointerEvents="box-none">
+      {/* top bar (calibration shows its own title instead) */}
+      <View
+        style={[styles.topBar, { top: insets.top + space.sm }, calibrating && styles.hidden]}
+        pointerEvents={calibrating ? 'none' : 'box-none'}
+      >
         <Pressable
           style={({ pressed }) => [styles.chip, pressed && { opacity: 0.7 }]}
           onPress={() => router.push('/viewpoints')}
@@ -139,29 +168,64 @@ export default function Home() {
           { paddingBottom: insets.bottom, height: BOTTOM_BAR + insets.bottom },
         ]}
       >
-        <BarButton
-          icon="map-outline"
-          label={strings.home.places}
-          onPress={() => router.push('/viewpoints')}
-        />
-        <BarButton icon="list" label={strings.home.peaks} onPress={() => router.push('/peaks')} />
-        {cameraSupported ? (
-          <BarButton
-            icon={inCamera ? 'image-outline' : 'camera-outline'}
-            label={inCamera ? strings.camera.modePanorama : strings.camera.modeCamera}
-            onPress={() => setMode(inCamera ? 'panorama' : 'camera')}
-          />
-        ) : null}
-        <BarButton
-          icon="compass-outline"
-          label={strings.camera.calibrate}
-          onPress={() => router.push('/calibration')}
-        />
-        <BarButton
-          icon="information-circle-outline"
-          label={strings.home.info}
-          onPress={() => router.push('/about')}
-        />
+        {calibrating ? (
+          <>
+            <BarButton
+              icon="refresh"
+              label={strings.calibration.reset}
+              onPress={calib.resetDraft}
+            />
+            <BarButton icon="close" label={strings.calibration.cancel} onPress={calib.cancel} />
+            <BarButton
+              icon="checkmark-circle"
+              label={strings.calibration.done}
+              onPress={calib.done}
+              highlight
+            />
+          </>
+        ) : (
+          <>
+            <BarButton
+              icon="map-outline"
+              label={strings.home.places}
+              onPress={() => router.push('/viewpoints')}
+            />
+            <BarButton
+              icon="list"
+              label={strings.home.peaks}
+              onPress={() => router.push('/peaks')}
+            />
+            {cameraSupported ? (
+              <BarButton
+                icon={inCamera ? 'image-outline' : 'camera-outline'}
+                label={inCamera ? strings.camera.modePanorama : strings.camera.modeCamera}
+                onPress={() => setMode(inCamera ? 'panorama' : 'camera')}
+              />
+            ) : null}
+            <BarButton
+              icon={saved.calibratedAt !== null ? 'checkmark-circle' : 'compass-outline'}
+              label={
+                saved.calibratedAt !== null
+                  ? strings.calibration.calibrated
+                  : strings.camera.calibrate
+              }
+              highlight={saved.calibratedAt !== null}
+              onPress={() => {
+                if (!cameraSupported) {
+                  router.push('/calibration');
+                  return;
+                }
+                setMode('camera');
+                calib.begin();
+              }}
+            />
+            <BarButton
+              icon="information-circle-outline"
+              label={strings.home.info}
+              onPress={() => router.push('/about')}
+            />
+          </>
+        )}
       </View>
     </View>
   );
@@ -250,10 +314,13 @@ function BarButton({
   icon,
   label,
   onPress,
+  highlight = false,
 }: {
   icon: IconName;
   label: string;
   onPress: () => void;
+  /** Accent colour (calibrated badge, primary action). */
+  highlight?: boolean;
 }) {
   return (
     <Pressable
@@ -262,8 +329,8 @@ function BarButton({
       accessibilityRole="button"
       accessibilityLabel={label}
     >
-      <Ionicons name={icon} size={24} color={colors.text} />
-      <Text style={styles.barLabel}>{label}</Text>
+      <Ionicons name={icon} size={24} color={highlight ? colors.accent : colors.text} />
+      <Text style={[styles.barLabel, highlight && { color: colors.accent }]}>{label}</Text>
     </Pressable>
   );
 }
@@ -271,6 +338,7 @@ function BarButton({
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
   emptyArea: { justifyContent: 'center' },
+  hidden: { opacity: 0 },
   topBar: {
     position: 'absolute',
     left: space.md,

@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors } from '../src/components/theme';
+import { useCalibrationStore } from '../src/store/calibrationStore';
 import { usePackStore } from '../src/store/packStore';
 import { useSceneSync } from '../src/store/useSceneSync';
 import { strings } from '../src/strings';
@@ -20,6 +21,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     load();
+    useCalibrationStore.getState().load();
   }, [load]);
 
   useEffect(() => {
