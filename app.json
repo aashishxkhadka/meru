@@ -64,7 +64,8 @@
         }
       ],
       "expo-dev-client",
-      "expo-font"
+      "expo-font",
+      "expo-sharing"
     ],
     "backgroundColor": "#0b1220"
   }

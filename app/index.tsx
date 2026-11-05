@@ -12,6 +12,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { circularMeanDeg, wrapTo360 } from '../src/core/angles';
+import { photoPlaceName } from '../src/core/photoComposition';
 import { CameraLive, cameraSupported } from '../src/components/camera/CameraLive';
 import { Calibrator, useCalibrationSession } from '../src/components/camera/Calibrator';
 import { Panorama } from '../src/components/panorama/Panorama';
@@ -20,6 +21,7 @@ import { Button, EmptyState, type IconName } from '../src/components/ui';
 import { useCalibrationStore } from '../src/store/calibrationStore';
 import { useLocationStore } from '../src/store/locationStore';
 import { useOrientationStore } from '../src/store/orientationStore';
+import { usePack } from '../src/store/packStore';
 import { useSceneStore } from '../src/store/sceneStore';
 import { strings } from '../src/strings';
 
@@ -42,6 +44,7 @@ export default function Home() {
   const [mode, setMode] = useState<'camera' | 'panorama'>(cameraSupported ? 'camera' : 'panorama');
   const saved = useCalibrationStore();
   const calib = useCalibrationSession();
+  const pack = usePack();
 
   // Start GPS on first open (onboarding will ask first, step 11).
   const { source, gpsStatus, startGps } = location;
@@ -67,6 +70,15 @@ export default function Home() {
   const calibrating = calib.active && inCamera;
   const openPeak = (id: string) => router.push({ pathname: '/peak/[id]', params: { id } });
   const panoHeight = height - insets.bottom - BOTTOM_BAR;
+  const placeName = scene
+    ? photoPlaceName(
+        scene.position,
+        location.source === 'simulated' ? (location.viewpoint?.name ?? null) : null,
+        pack.viewpoints,
+        pack.manifest.name,
+        strings.photo.near,
+      )
+    : '';
 
   return (
     <View style={styles.root}>
@@ -80,6 +92,13 @@ export default function Home() {
           calibration={calibrating ? calib.draft.offsets : saved.offsets}
           hFovOverrideDeg={calibrating ? calib.draft.hFovOverrideDeg : saved.hFovOverrideDeg}
           highlightPeakId={calibrating ? calib.pickedPeakId : null}
+          placeName={placeName}
+          onPhotoCaptured={(p) =>
+            router.push({
+              pathname: '/photo-preview',
+              params: { uri: p.uri, w: String(p.widthPx), h: String(p.heightPx) },
+            })
+          }
           renderExtra={
             calibrating
               ? ({ view, pose, autoHFovDeg }) => (

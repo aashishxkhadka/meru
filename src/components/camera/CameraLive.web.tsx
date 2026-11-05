@@ -15,6 +15,8 @@ export function CameraLive(_props: {
   calibration: CalibrationOffsets;
   hFovOverrideDeg: number | null;
   highlightPeakId?: string | null;
+  onPhotoCaptured?: (photo: { uri: string; widthPx: number; heightPx: number }) => void;
+  placeName?: string;
   renderExtra?: (ctx: {
     view: CameraView;
     pose: CameraPose | null;

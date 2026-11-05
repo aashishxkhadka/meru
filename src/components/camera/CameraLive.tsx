@@ -4,8 +4,15 @@
  */
 import { Ionicons } from '@expo/vector-icons';
 import { type ReactNode, memo, useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Camera, useCameraDevice, useCameraPermission } from 'react-native-vision-camera';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  Camera,
+  type CameraPhotoOutput,
+  CommonResolutions,
+  useCameraDevice,
+  useCameraPermission,
+  usePhotoOutput,
+} from 'react-native-vision-camera';
 
 import { viewWithFovOverride } from '../../core/calibration';
 import {
@@ -16,6 +23,7 @@ import {
   sensorFovFromFocalLength35mm,
   visibleFovForCover,
 } from '../../core/projection';
+import { type CapturedPhoto, captureLabelledPhoto } from '../../photo/captureLabelledPhoto';
 import { useOrientationStore } from '../../store/orientationStore';
 import type { PackScene } from '../../store/sceneStore';
 import { strings } from '../../strings';
@@ -27,6 +35,7 @@ import { CameraOverlay } from './CameraOverlay';
 const IDLE_PAUSE_MS = 3 * 60 * 1000;
 /** SPEC 3.2: phone pointed at the ground. */
 const POINTING_DOWN_DEG = -30;
+const SHUTTER_SIZE = 72;
 
 export const cameraSupported = true;
 
@@ -41,6 +50,10 @@ interface Props {
   calibration: CalibrationOffsets;
   /** Hand-set horizontal FOV (advanced calibration); null = from the lens. */
   hFovOverrideDeg: number | null;
+  /** Shutter button (hidden while calibrating). Called with the labelled photo. */
+  onPhotoCaptured?: (photo: CapturedPhoto) => void;
+  /** Caption for the photo frame. */
+  placeName?: string;
   /** Peak to emphasise (calibration "tap a peak"). */
   highlightPeakId?: string | null;
   /** Extra layer above the overlay (calibration controls), given the live view and pose. */
@@ -61,9 +74,17 @@ export function CameraLive({
   hFovOverrideDeg,
   highlightPeakId = null,
   renderExtra,
+  onPhotoCaptured,
+  placeName = '',
 }: Props) {
   const { hasPermission, requestPermission } = useCameraPermission();
   const device = useCameraDevice('back', { physicalDevices: ['wide-angle'] });
+  // ~5 MP 4:3 still: plenty for sharing, light enough to composite on mid-range phones.
+  const photoOutput = usePhotoOutput({
+    targetResolution: CommonResolutions.QHD_4_3,
+    qualityPrioritization: 'balanced',
+  });
+  const [capturing, setCapturing] = useState(false);
   const { headingDeg, pitchDeg, rollDeg, headingAccuracy, magneticDisturbed } =
     useOrientationStore();
 
@@ -93,10 +114,14 @@ export function CameraLive({
 
   // Field of view actually visible on screen (preview fills the view, cropping the sides).
   const focalLengthMm = device?.focalLength;
-  const autoView: CameraView = useMemo(() => {
-    const sensor = focalLengthMm ? sensorFovFromFocalLength35mm(focalLengthMm) : DEFAULT_SENSOR_FOV;
-    return { widthPx: width, heightPx: height, ...visibleFovForCover(sensor, width, height) };
-  }, [focalLengthMm, width, height]);
+  const sensorFov = useMemo(
+    () => (focalLengthMm ? sensorFovFromFocalLength35mm(focalLengthMm) : DEFAULT_SENSOR_FOV),
+    [focalLengthMm],
+  );
+  const autoView: CameraView = useMemo(
+    () => ({ widthPx: width, heightPx: height, ...visibleFovForCover(sensorFov, width, height) }),
+    [sensorFov, width, height],
+  );
   const view = useMemo(
     () => viewWithFovOverride(autoView, hFovOverrideDeg),
     [autoView, hFovOverrideDeg],
@@ -132,10 +157,39 @@ export function CameraLive({
       ? { headingDeg, pitchDeg, rollDeg }
       : null;
   const compassPoor = magneticDisturbed || (headingAccuracy !== null && headingAccuracy <= 1);
+  const showShutter = !!onPhotoCaptured && !renderExtra && !paused;
+
+  const takePhoto = async () => {
+    if (capturing || !onPhotoCaptured) return;
+    wake();
+    setCapturing(true);
+    try {
+      const photo = await captureLabelledPhoto({
+        photoOutput,
+        readPose: () => {
+          const o = useOrientationStore.getState();
+          return o.headingDeg !== null && o.pitchDeg !== null && o.rollDeg !== null
+            ? { headingDeg: o.headingDeg, pitchDeg: o.pitchDeg, rollDeg: o.rollDeg }
+            : null;
+        },
+        scene,
+        calibration,
+        sensorFov,
+        screenAutoHFovDeg: autoView.hFovDeg,
+        hFovOverrideDeg,
+        placeName,
+      });
+      onPhotoCaptured(photo);
+    } catch (e) {
+      Alert.alert(strings.photo.failedTitle, e instanceof Error ? e.message : String(e));
+    } finally {
+      setCapturing(false);
+    }
+  };
 
   return (
     <View style={{ width, height }} onTouchStart={wake}>
-      <Preview device={device} active={!paused} />
+      <Preview device={device} active={!paused} photoOutput={photoOutput} />
       {pose && !paused ? (
         <CameraOverlay
           scene={scene}
@@ -155,8 +209,30 @@ export function CameraLive({
       {pose && pose.pitchDeg < POINTING_DOWN_DEG && !paused ? (
         <Hint icon="arrow-up-circle-outline" text={strings.camera.pointUp} />
       ) : null}
+      {showShutter ? (
+        <View style={styles.shutterWrap} pointerEvents="box-none">
+          <Pressable
+            onPress={takePhoto}
+            disabled={!pose || capturing}
+            style={({ pressed }) => [
+              styles.shutter,
+              (!pose || capturing) && { opacity: 0.5 },
+              pressed && { transform: [{ scale: 0.94 }] },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel={strings.photo.shutter}
+          >
+            <View style={styles.shutterInner}>
+              {capturing ? <ActivityIndicator color={colors.bg} /> : null}
+            </View>
+          </Pressable>
+        </View>
+      ) : null}
       {compassPoor && !paused ? (
-        <View style={styles.banner} pointerEvents="none">
+        <View
+          style={[styles.banner, showShutter && { bottom: SHUTTER_SIZE + space.lg * 2 }]}
+          pointerEvents="none"
+        >
           <Ionicons name="infinite" size={20} color={colors.accent} />
           <Text style={styles.bannerText}>{strings.camera.calibrateCompass}</Text>
         </View>
@@ -175,15 +251,20 @@ export function CameraLive({
 const Preview = memo(function Preview({
   device,
   active,
+  photoOutput,
 }: {
   device: NonNullable<ReturnType<typeof useCameraDevice>>;
   active: boolean;
+  photoOutput: CameraPhotoOutput;
 }) {
   return (
     <Camera
       style={StyleSheet.absoluteFill}
       device={device}
       isActive={active}
+      outputs={[photoOutput]}
+      // stills follow the (portrait-locked) UI, so they share the screen's axes and roll
+      orientationSource="interface"
       resizeMode="cover"
       zoom={1}
     />
@@ -241,6 +322,31 @@ const styles = StyleSheet.create({
     padding: space.md,
   },
   bannerText: { color: colors.text, fontSize: 14, flex: 1, lineHeight: 19 },
+  shutterWrap: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: space.lg,
+    alignItems: 'center',
+  },
+  shutter: {
+    width: SHUTTER_SIZE,
+    height: SHUTTER_SIZE,
+    borderRadius: SHUTTER_SIZE / 2,
+    borderWidth: 4,
+    borderColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.2)',
+  },
+  shutterInner: {
+    width: SHUTTER_SIZE - 16,
+    height: SHUTTER_SIZE - 16,
+    borderRadius: (SHUTTER_SIZE - 16) / 2,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   paused: {
     backgroundColor: 'rgba(11,18,32,0.85)',
     alignItems: 'center',

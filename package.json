@@ -15,7 +15,8 @@
     "format:check": "prettier --check .",
     "elev": "tsx scripts/elev.ts",
     "panorama": "tsx scripts/panorama.ts",
-    "postinstall": "setup-skia-web public"
+    "postinstall": "setup-skia-web public",
+    "photo-sample": "tsx scripts/photo-sample.ts"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
@@ -32,6 +33,7 @@
     "expo-media-library": "~58.0.13",
     "expo-router": "~58.0.29",
     "expo-sensors": "~58.0.4",
+    "expo-sharing": "~58.0.22",
     "expo-splash-screen": "~58.0.12",
     "expo-status-bar": "~58.0.4",
     "expo-system-ui": "~58.0.7",

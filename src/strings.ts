@@ -7,6 +7,7 @@ export const strings = {
   retry: 'Try again',
   back: 'Back',
   close: 'Close',
+  openSettings: 'Open settings',
 
   home: {
     places: 'Places',
@@ -73,7 +74,6 @@ export const strings = {
     viewpoints: 'Viewpoints',
     viewpointsHint: 'Stand at a famous viewpoint without being there.',
   },
-  comingSoon: 'Coming soon',
   calibration: {
     title: 'Calibrate',
     heading: 'Line up the skyline',
@@ -103,8 +103,24 @@ export const strings = {
       'Open Meru on your phone, point it at the mountains and tap Calibrate to line up the skyline with the real ridge.',
   },
   photo: {
-    title: 'Photo',
-    text: 'Take a photo with the peak names on it and share it. Arrives with the camera view.',
+    title: 'Your photo',
+    shutter: 'Take photo',
+    peaksPrefix: 'Peaks:',
+    more: (n: number) => `+${n} more`,
+    near: (place: string) => `Near ${place}`,
+    noPose: 'Still waiting for the compass. Hold the phone steady and try again.',
+    failedTitle: 'Could not take the photo',
+    save: 'Save',
+    saving: 'Saving…',
+    saved: 'Saved to Photos',
+    share: 'Share',
+    retake: 'Retake',
+    missing: 'This photo is no longer available. Take a new one.',
+    saveDeniedTitle: 'Allow access to Photos',
+    saveDeniedText:
+      'Meru needs permission to save photos. You can allow it in your phone settings.',
+    saveFailed: 'Could not save the photo',
+    shareUnavailable: 'Sharing is not available on this device.',
   },
   onboarding: {
     title: 'Welcome to Meru',
