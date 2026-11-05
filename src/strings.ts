@@ -7,6 +7,7 @@ export const strings = {
   retry: 'Try again',
   back: 'Back',
   close: 'Close',
+  cancel: 'Cancel',
   openSettings: 'Open settings',
 
   home: {
@@ -123,26 +124,29 @@ export const strings = {
     shareUnavailable: 'Sharing is not available on this device.',
   },
   onboarding: {
-    title: 'Welcome to Meru',
-    subtitle: 'The mountains around you, named.',
-    features: [
+    skip: 'Skip',
+    next: 'Next',
+    allow: 'Allow location & camera',
+    asking: 'Asking…',
+    permissionsText:
+      'Meru needs your location to know which peaks you can see, and the camera to label them. Nothing leaves your phone.',
+    slides: [
       {
         icon: 'eye-outline',
         title: 'Point and see',
-        text: 'Every visible peak labelled with its name, height and distance.',
+        text: 'Hold up your phone and every visible peak is named, with its height and distance.',
       },
       {
         icon: 'cloud-offline-outline',
         title: 'No signal needed',
-        text: 'All maps live on your phone. Works in airplane mode.',
+        text: 'All the maps live on your phone. Meru works in airplane mode, high on the trail.',
       },
       {
         icon: 'compass-outline',
-        title: 'Calibrate once',
-        text: 'A quick alignment makes labels sit right on the summits.',
+        title: 'Line it up once',
+        text: 'Phone compasses drift. Tap Calibrate and drag the skyline onto the real ridge for spot-on labels.',
       },
     ],
-    start: 'Get started',
   },
   about: {
     title: 'About',
@@ -156,8 +160,37 @@ export const strings = {
   debug: {
     title: 'Diagnostics',
     pack: 'Data pack',
+    region: 'Region',
+    demGrid: 'DEM grid',
+    bounds: 'Bounds',
+    peaksViewpoints: 'Peaks / viewpoints',
     loadTime: 'Load time',
+    resolveAsset: 'Resolve asset',
+    readDem: 'Read dem.bin',
+    parse: 'Validate + parse',
+    total: 'Total',
+    startup: 'JS start → app ready',
     scene: 'Scene',
+    status: 'Status',
+    horizon: 'Horizon compute',
+    visibility: 'Visibility compute',
+    wallTime: 'Wall time',
+    chunks: (n: number) => `${n} chunks`,
+    observer: 'Observer',
+    visiblePeaks: 'Visible peaks',
+    visibleOf: (v: number, n: number) => `${v} of ${n}`,
+    computes: 'Computes / cache hits',
     spotCheck: 'Elevation spot-check',
+    spotCheckHint: 'Pipeline values: Sarangkot ≈ 1564 m, Pagoda ≈ 1094 m, Lakeside ≈ 796 m.',
+    notAvailable: 'n/a',
+    events: 'Event log (offline)',
+    eventCount: 'Events stored',
+    eventsHint:
+      'Kept only on this phone. Export sends a JSON file through the share sheet (e.g. to email or WhatsApp).',
+    exportEvents: 'Export events (JSON)',
+    exporting: 'Exporting…',
+    clearEvents: 'Clear log',
+    clearConfirm: 'Delete all logged events on this phone?',
+    exportFailed: 'Could not export the log',
   },
 } as const;

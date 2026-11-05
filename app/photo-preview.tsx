@@ -8,6 +8,7 @@ import { Alert, Image, Linking, StyleSheet, View, useWindowDimensions } from 're
 import { ScreenLayout } from '../src/components/ScreenLayout';
 import { space } from '../src/components/theme';
 import { Button, EmptyState } from '../src/components/ui';
+import { logEvent } from '../src/store/eventLogStore';
 import { strings } from '../src/strings';
 
 /** Photo preview (SPEC 3.7): the composited photo, Save to gallery and Share. */
@@ -56,6 +57,7 @@ export default function PhotoPreviewScreen() {
       }
       await Asset.create(uri);
       setSaveState('saved');
+      logEvent('photo_saved');
     } catch (e) {
       setSaveState('idle');
       Alert.alert(strings.photo.saveFailed, e instanceof Error ? e.message : String(e));
@@ -68,6 +70,7 @@ export default function PhotoPreviewScreen() {
       return;
     }
     await Sharing.shareAsync(uri, { mimeType: 'image/jpeg', UTI: 'public.jpeg' });
+    logEvent('photo_shared');
   };
 
   // Fit the whole photo (incl. frame) above the buttons.

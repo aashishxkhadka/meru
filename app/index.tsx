@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -22,7 +22,9 @@ import { useCalibrationStore } from '../src/store/calibrationStore';
 import { useLocationStore } from '../src/store/locationStore';
 import { useOrientationStore } from '../src/store/orientationStore';
 import { usePack } from '../src/store/packStore';
+import { logEvent } from '../src/store/eventLogStore';
 import { useSceneStore } from '../src/store/sceneStore';
+import { useSettingsStore } from '../src/store/settingsStore';
 import { strings } from '../src/strings';
 
 const TOP_BAR = 56;
@@ -45,12 +47,16 @@ export default function Home() {
   const saved = useCalibrationStore();
   const calib = useCalibrationSession();
   const pack = usePack();
+  const onboarded = useSettingsStore((s) => s.onboarded) === true;
 
-  // Start GPS on first open (onboarding will ask first, step 11).
+  // Start GPS once onboarding has explained why (and asked for permission).
   const { source, gpsStatus, startGps } = location;
   useEffect(() => {
-    if (source === 'gps' && gpsStatus === 'idle') startGps();
-  }, [source, gpsStatus, startGps]);
+    if (onboarded && source === 'gps' && gpsStatus === 'idle') startGps();
+  }, [onboarded, source, gpsStatus, startGps]);
+  useEffect(() => {
+    if (onboarded) logEvent('mode_changed', { mode });
+  }, [onboarded, mode]);
   const { supported, start, stop } = orientation;
   useEffect(() => {
     if (!supported) return;
@@ -79,6 +85,8 @@ export default function Home() {
         strings.photo.near,
       )
     : '';
+
+  if (!onboarded) return <Redirect href="/onboarding" />;
 
   return (
     <View style={styles.root}>

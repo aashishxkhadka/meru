@@ -83,6 +83,12 @@ npm run lint               # ESLint (eslint-config-expo + prettier; src/core pur
 npm run format             # Prettier write (format:check to verify)
 npm run elev -- 28.24625 83.94881   # elevation at lat lon from the real pack via src/core/dem.ts (tsx)
 npm run panorama -- sarangkot world-peace-pagoda pokhara-lakeside   # PNGs + peak table + timings -> tools/out/
+npm run photo-sample -- sarangkot [--heading 330 --pitch 5 --roll 3]   # exported-photo layout (step 10) -> tools/out/
+npm run make-icons         # regenerate placeholder icon/splash PNGs in assets/
+
+# Release builds (EAS cloud; full steps in docs/RELEASE.md). One-time: npx eas-cli@latest login && npx eas-cli@latest init
+npx eas-cli@latest build --platform android --profile preview      # tester APK (link + QR code)
+npx eas-cli@latest build --platform ios --profile testflight       # then: eas submit --platform ios --profile testflight --latest
 
 # Development build (native modules; not Expo Go). android/ and ios/ are generated, git-ignored:
 npx expo prebuild --clean          # regenerate native projects after app.json/plugin changes
@@ -110,6 +116,9 @@ Notes:
 - Storage: AsyncStorage (not MMKV). UI strings: `src/strings.ts`. Shared UI kit: `src/components/ui.tsx`.
 - Camera pose (step 8), verified from expo-sensors native source: `DeviceMotion.accelerationIncludingGravity` points DOWN in device axes on both platforms (face-up ⇒ z ≈ −9.81); `Magnetometer` is the calibrated field on both. Device axes: x right, y top, z towards the user; back camera = −z. Pitch/roll come from gravity and heading from a tilt-compensated compass in `src/core/orientation.ts` — do NOT use DeviceMotion `rotation` Euler angles (platform conventions differ and they gimbal-lock when the phone is upright) or expo-location heading for the camera direction (it tracks the phone's top edge). expo-location heading is used only for accuracy (figure-8 prompt) and declination.
 - Camera FOV: VisionCamera v5 has no FOV field; `focalLength` is 35 mm-equivalent → `sensorFovFromFocalLength35mm`, then `visibleFovForCover` because the full-screen preview crops the sides (~34° visible on a tall phone, not 50°).
+- Photo export (step 10): `src/core/photoComposition.ts` lays out the still (labels, skyline, frame) as a draw list; `src/photo/renderPhoto.ts` draws it with Skia offscreen (CPU raster), `scripts/photo-sample.ts` draws the same list in Node. Camera uses `orientationSource="interface"` so stills share the portrait screen's axes. Still FOV = full lens FOV (not the screen crop); a hand-set FOV is applied as the same lens correction (`stillPhotoView`). Forced (overlapping) labels are dropped on photos. Sharing uses expo-sharing (RN `Share` cannot share image files on Android).
+- Onboarding (step 11): shown until `meru.onboarded.v1` is set (`src/store/settingsStore.ts`); Home redirects to `/onboarding` and only starts GPS after it. To see it again, clear app data.
+- Offline event log (SPEC 9): `logEvent(type, data)` from `src/store/eventLogStore.ts` (types in `src/core/eventLog.ts`). Batched JSON lines in the documents folder, max 5,000 events, exported from Diagnostics via the share sheet. Never sent anywhere automatically.
 - Jest uses `tsconfig.jest.json`; tests import `describe/it/expect` from `@jest/globals` (TS 6 does not pick up Jest globals automatically).
 - Node-only files (`scripts/`, real-data tests in `tests/`) start with `/// <reference types="node" />`; Node types are not loaded for the app.
 - `tests/dem.real.test.ts` checks `src/core/dem.ts` against the Python reader on the real pack (1,008 reference points).

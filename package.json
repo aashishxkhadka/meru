@@ -16,7 +16,8 @@
     "elev": "tsx scripts/elev.ts",
     "panorama": "tsx scripts/panorama.ts",
     "postinstall": "setup-skia-web public",
-    "photo-sample": "tsx scripts/photo-sample.ts"
+    "photo-sample": "tsx scripts/photo-sample.ts",
+    "make-icons": "tsx scripts/make-icons.ts"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",

@@ -14,6 +14,7 @@ import {
   gridKey,
   needsRecompute,
 } from '../core/scene';
+import { logEvent } from './eventLogStore';
 import type { ObserverPosition } from './locationStore';
 
 export type PackScene = Scene<PackPeak>;
@@ -72,6 +73,10 @@ export const useSceneStore = create<SceneState>((set, get) => ({
         error: null,
         cacheHits: s.cacheHits + 1,
       }));
+      logEvent('scene_ready', {
+        visiblePeaks: cached.peaks.filter((r) => r.visible).length,
+        cached: true,
+      });
       return;
     }
 
@@ -97,6 +102,12 @@ export const useSceneStore = create<SceneState>((set, get) => ({
           lastComputeMs: result.timing.horizonMs + result.timing.visibilityMs,
           computeCount: s.computeCount + 1,
         }));
+        logEvent('scene_ready', {
+          visiblePeaks: result.peaks.filter((r) => r.visible).length,
+          computeMs: result.timing.horizonMs + result.timing.visibilityMs,
+          wallMs: result.timing.totalMs,
+          cached: false,
+        });
       })
       .catch((e: unknown) => {
         if (e instanceof SceneCancelledError || token.cancelled) return;

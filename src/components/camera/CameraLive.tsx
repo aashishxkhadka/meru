@@ -24,6 +24,7 @@ import {
   visibleFovForCover,
 } from '../../core/projection';
 import { type CapturedPhoto, captureLabelledPhoto } from '../../photo/captureLabelledPhoto';
+import { logEvent } from '../../store/eventLogStore';
 import { useOrientationStore } from '../../store/orientationStore';
 import type { PackScene } from '../../store/sceneStore';
 import { strings } from '../../strings';
@@ -179,8 +180,18 @@ export function CameraLive({
         hFovOverrideDeg,
         placeName,
       });
+      logEvent('photo_taken', {
+        labels: photo.peakNames.length,
+        widthPx: photo.widthPx,
+        heightPx: photo.heightPx,
+        captureMs: photo.timingMs.capture,
+        composeMs: photo.timingMs.decode + photo.timingMs.compose,
+        totalMs: photo.timingMs.total,
+        calibrated: calibration.headingOffsetDeg !== 0 || calibration.pitchOffsetDeg !== 0,
+      });
       onPhotoCaptured(photo);
     } catch (e) {
+      logEvent('photo_failed', { error: e instanceof Error ? e.message : String(e) });
       Alert.alert(strings.photo.failedTitle, e instanceof Error ? e.message : String(e));
     } finally {
       setCapturing(false);

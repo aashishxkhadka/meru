@@ -7,6 +7,7 @@ import { create } from 'zustand';
 
 import { clampOffsets, parseCalibration } from '../core/calibration';
 import { type CalibrationOffsets, NO_CALIBRATION } from '../core/projection';
+import { logEvent } from './eventLogStore';
 
 const KEY = 'meru.calibration.v1';
 
@@ -46,6 +47,7 @@ export const useCalibrationStore = create<CalibrationState>((set, get) => ({
     }
     const calibratedAt = Date.now();
     set({ offsets: clean, hFovOverrideDeg, calibratedAt });
+    logEvent('calibration_saved', { ...clean, hFovOverrideDeg });
     try {
       await AsyncStorage.setItem(KEY, JSON.stringify({ ...clean, hFovOverrideDeg, calibratedAt }));
     } catch {
@@ -54,6 +56,7 @@ export const useCalibrationStore = create<CalibrationState>((set, get) => ({
   },
 
   reset: async () => {
+    if (get().calibratedAt !== null) logEvent('calibration_reset');
     set({ offsets: NO_CALIBRATION, hFovOverrideDeg: null, calibratedAt: null });
     try {
       await AsyncStorage.removeItem(KEY);

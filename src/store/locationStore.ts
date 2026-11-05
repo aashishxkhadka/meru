@@ -5,6 +5,7 @@
 import { create } from 'zustand';
 
 import type { PackViewpoint } from '../core/pack';
+import { logEvent } from './eventLogStore';
 import { type GpsFix, type GpsWatch, startGpsWatch } from '../sensors/gps';
 
 /** A fix counts as "fixed" once it is at least this accurate. */
@@ -58,6 +59,16 @@ export const useLocationStore = create<LocationState>((set, get) => ({
       const { result, watch: w } = await startGpsWatch(
         (fix) => {
           const accurate = fix.accuracyM !== null && fix.accuracyM <= FIX_ACCURACY_M;
+          const prev = get();
+          if (accurate && prev.gpsStatus !== 'fixed') {
+            logEvent('location_set', {
+              source: 'gps',
+              accuracyM: fix.accuracyM,
+              secondsToFix: prev.searchStartedAt
+                ? (Date.now() - prev.searchStartedAt) / 1000
+                : undefined,
+            });
+          }
           set({ fix, gpsStatus: accurate ? 'fixed' : 'searching' });
         },
         (message) => set({ gpsError: message }),
@@ -82,6 +93,7 @@ export const useLocationStore = create<LocationState>((set, get) => ({
   simulate: (viewpoint) => {
     stopWatch(); // save battery while simulating
     set({ source: 'simulated', viewpoint, gpsStatus: 'idle', searchStartedAt: null });
+    logEvent('location_set', { source: 'simulated', viewpoint: viewpoint.id });
   },
 }));
 

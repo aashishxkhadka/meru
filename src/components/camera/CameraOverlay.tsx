@@ -1,6 +1,6 @@
 /** Skyline + peak labels projected over the camera preview (per-frame projection only). */
 import { Canvas, Path, Skia } from '@shopify/react-native-skia';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import {
@@ -9,11 +9,15 @@ import {
   type CameraView,
   projectToScreen,
 } from '../../core/projection';
+import { shouldLogChange } from '../../core/eventLog';
+import { logEvent } from '../../store/eventLogStore';
 import type { PackScene } from '../../store/sceneStore';
 import { LABEL_ROW_HEIGHT, type LabelItem, PeakLabels, placeLabels } from '../labels/PeakLabels';
 
 /** SPEC 6.6: up to 3 label rows over the camera. */
 export const LABEL_ROWS = 3;
+/** labels_shown is logged when the count changes, at most this often. */
+const LABEL_LOG_GAP_MS = 10_000;
 
 export function CameraOverlay({
   scene,
@@ -69,6 +73,16 @@ export function CameraOverlay({
     });
   }
   const placed = placeLabels(items, view.widthPx, LABEL_ROWS);
+  const lastLogged = useRef<{ value: number; t: number } | null>(null);
+  const shown = placed.length;
+  useEffect(() => {
+    const now = Date.now();
+    if (!shouldLogChange(lastLogged.current, shown, now, LABEL_LOG_GAP_MS)) return;
+    lastLogged.current = { value: shown, t: now };
+    logEvent('labels_shown', { count: shown, mode: 'camera', headingDeg: pose.headingDeg });
+    // re-checked on every pose update (a cheap comparison), so a change that came too soon
+    // after the last entry is still logged once the gap has passed
+  }, [shown, pose.headingDeg]);
   // Labels ride just above the skyline, but never under the top bar or too low on screen.
   const minBottom = topInset + LABEL_ROWS * LABEL_ROW_HEIGHT + 8;
   const labelBottom = Math.min(Math.max(minBottom, topY - 10), view.heightPx * 0.7);

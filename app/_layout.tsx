@@ -1,3 +1,5 @@
+// must stay the first import: it records the JS start time
+import { markAppReady } from '../src/appStart';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -6,7 +8,9 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 
 import { colors } from '../src/components/theme';
 import { useCalibrationStore } from '../src/store/calibrationStore';
+import { logEvent, useEventLogStore } from '../src/store/eventLogStore';
 import { usePackStore } from '../src/store/packStore';
+import { useSettingsStore } from '../src/store/settingsStore';
 import { useSceneSync } from '../src/store/useSceneSync';
 import { strings } from '../src/strings';
 
@@ -18,15 +22,29 @@ export default function RootLayout() {
   const error = usePackStore((s) => s.state.error);
   const load = usePackStore((s) => s.load);
   const retry = usePackStore((s) => s.retry);
+  const onboarded = useSettingsStore((s) => s.onboarded);
 
   useEffect(() => {
+    void useEventLogStore.getState().load();
+    void useSettingsStore.getState().load();
     load();
     useCalibrationStore.getState().load();
   }, [load]);
 
   useEffect(() => {
-    if (status === 'ready' || status === 'error') SplashScreen.hideAsync().catch(() => {});
+    if (status === 'ready') {
+      const { state } = usePackStore.getState();
+      logEvent('app_open', {
+        packLoadMs: state.status === 'ready' ? state.timing.totalMs : undefined,
+        jsStartToReadyMs: markAppReady(),
+      });
+    }
   }, [status]);
+
+  const ready = (status === 'ready' && onboarded !== null) || status === 'error';
+  useEffect(() => {
+    if (ready) SplashScreen.hideAsync().catch(() => {});
+  }, [ready]);
 
   if (status === 'error') {
     return (
@@ -39,7 +57,7 @@ export default function RootLayout() {
       </View>
     );
   }
-  if (status !== 'ready') {
+  if (status !== 'ready' || onboarded === null) {
     return (
       <View style={styles.center}>
         <ActivityIndicator color={colors.accent} />
@@ -53,6 +71,7 @@ export default function RootLayout() {
       <SceneSync />
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}>
         <Stack.Screen name="index" />
+        <Stack.Screen name="onboarding" options={{ gestureEnabled: false, animation: 'fade' }} />
         <Stack.Screen
           name="peak/[id]"
           options={{
